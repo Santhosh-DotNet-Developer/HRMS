@@ -1,0 +1,209 @@
+﻿@model HRMS.Models.MANUAL_ATTENDANCE
+@{
+    Layout = null;
+    if (Model.MA_CRE_BY == null)
+    {
+        ViewBag.Title = "Attendance - Add New";
+    }
+    else
+    {
+        ViewBag.Title = "Attendance - Edit";
+    }
+    string empCode = HttpContext.Current.Request.Cookies[Constant.EmpCode].Value;
+    string empName = HRMS.Models.DropDownList.GetEmployeeCodeName(empCode);
+    var curDate = DateTime.Now.Date.ToString("dd-MM-yyyy");
+}
+
+<div class="modal-header" id="manualAttdModalLabel">
+    <h5 class="modal-title">@ViewBag.Title</h5>
+    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><i class="bi bi-x"></i></button>
+</div>
+<div class="modal-body">
+    @using (Html.BeginForm("Save", "ManualAttendance", FormMethod.Post, new { @id = "frmAttendance" }))
+    {
+        @Html.AntiForgeryToken()
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="form-control-label"><strong>Employee</strong></label>
+                    <input type="text" id="Employee" class="form-control" readonly="readonly" />
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="form-control-label"><strong>Attendance Date</strong><span class="mantSpan"> *</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-calendar" style="height:auto"></i></span>
+                        @if (Model.MA_DATE == null)
+                        {
+                            @Html.TextBoxFor(m => m.MA_DATE, new { @class = "form-control attdDate", @placeholder = "Select Attendance Date", @readonly = "readonly", @disabled = "disabled" })
+                        }
+                        else
+                        {
+                            <input type="text" id="MA_DATE" name="MA_DATE" class="form-control attdDate" value="@Model.MA_DATE.Value.ToString("dd-MM-yyyy")" readonly="readonly" disabled ="disabled">
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <label class="form-control-label"><strong>In Time</strong><span class="mantSpan"> *</span></label>
+                @Html.TextBoxFor(m => m.MA_IN_TIME, new { @class = "form-control", @placeholder = "Enter In Time", @autocomplete = "off", @onkeypress = "return isNumberKey(event,this)"})
+                <label id="MA_IN_TIME_Error" class="error text-danger mt-2" for="MA_IN_TIME" style="display:none"></label>
+            </div>
+            <div class="col-sm-6">
+                <label class="form-control-label"><strong>Out Time</strong><span class="mantSpan"> *</span></label>
+                @Html.TextBoxFor(m => m.MA_OUT_TIME, new { @class = "form-control", @placeholder = "Enter Out Time", @autocomplete = "off", @onkeypress = "return isNumberKey(event,this)" })
+                <label id="MA_OUT_TIME_Error" class="error text-danger mt-2" for="MA_OUT_TIME" style="display:none"></label>
+            </div>
+        </div>
+    }
+</div>
+<div class="modal-footer">
+    @if (Model.MA_CRE_BY == null)
+    {
+        <button type="button" class="btn btn-primary btnSave">Save</button>
+    }
+    else
+    {
+        <button type="button" class="btn btn-primary btnSave">Update</button>
+    }
+    <button type="button" class="btn btn-success btnPost">Post</button>
+    <button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">Close</button>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('.attdDate').datepicker({
+            autoclose: true,
+            keyboardNavigation: false,
+            format: "dd-mm-yyyy",
+            todayBtn: "linked",
+            forceParse: false,
+            todayHighlight: true
+        });
+
+        $('#Employee').val('@empName');
+        $('#MA_DATE').val('@curDate');
+
+        $("#frmAttendance").validate({
+            rules: {
+                'MA_IN_TIME': {
+                    required: true
+                },
+                'MA_OUT_TIME': {
+                    required: true
+                }
+            },
+            messages: {
+                'MA_IN_TIME': {
+                    required: 'In Time must be entered'
+                },
+                'MA_OUT_TIME': {
+                    required: 'Out Time must be entered'
+                }
+            },
+            errorPlacement: function (label, element) {
+                label.addClass('mt-2 text-danger');
+                label.insertAfter(element);
+            },
+            highlight: function (element, errorClass) {
+                $(element).parent().addClass('has-danger')
+                $(element).addClass('form-control-danger')
+            }, errorPlacement: function (label, element) {
+                if (element.parent('.input-group').length) {
+                    label.insertAfter(element.parent());
+                    label.addClass('mt-2 text-danger');
+                    // radio/checkbox?
+                } else if (element.hasClass('select2')) {
+                    label.insertAfter(element.next('span'));
+                    label.addClass('mt-2 text-danger');
+                    // select2
+                } else {
+                    label.insertAfter(element);
+                    label.addClass('mt-2 text-danger');
+                    // default
+                }
+            }
+        });
+
+        $('.btnSave').on('click', function () {
+            if ($("#frmAttendance").valid()) {
+                var error = $('.error').text();
+                if (error == "") {
+                    $('#MA_DATE').attr("disabled", false);
+                    $("#frmAttendance").submit();
+                }
+            }
+        });
+    });
+
+    function isNumberKey(evt, element) {
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        if (charCode > 31 && (charCode < 48 || charCode > 57) && !(charCode == 46 || charCode == 8))
+            return false;
+        else {
+            var len = $(element).val().length;
+            var max = '2,2';
+            var maxLen = max.split(',');
+            var lenBeforeDot = maxLen[0];
+            var lenAfterDot = maxLen[1];
+            var charLen = (parseInt(lenBeforeDot) + parseInt(lenAfterDot)) + 1;
+            var dotCharLen = lenBeforeDot - 1;
+            var value = element.value + String.fromCharCode(charCode);
+            if (len < charLen) {
+                var elementId = $(element).attr("id");
+                var ctl = document.getElementById(elementId);
+                startPos = ctl.selectionStart;
+                var index = $(element).val().indexOf('.');
+                if (index >= 0 && charCode == 46) {
+                    return false;
+                }
+                if (index > 0) {
+                    var CharAfterdot = len - (index + 1);
+                    var CharBeforedot = len - (CharAfterdot + 1);
+
+                    if (CharBeforedot > lenBeforeDot) {
+                        return false;
+                    }
+                    else if (startPos - 1 < index) {
+                        return true;
+                    }
+                    if (CharAfterdot >= lenAfterDot) {
+                        return false;
+                    }
+                }
+                else {
+                    if (len > dotCharLen) {
+                        if (startPos <= lenBeforeDot && charCode == 46) {
+                            return true;
+                        }
+                        else if (index == 0) {
+                            var CharAfterdot = len - (index + 1);
+                            var CharBeforedot = len - (CharAfterdot + 1);
+
+                            if (CharBeforedot > lenBeforeDot) {
+                                return false;
+                            }
+                            else if (startPos - 1 < index) {
+                                return true;
+                            }
+                            if (CharAfterdot >= lenAfterDot) {
+                                return false;
+                            }
+                        }
+                        else {
+                            return false;
+                        }
+                    }
+                }
+            }
+            else {
+                return false;
+            }
+        }
+        return true;
+    }
+</script>
+
