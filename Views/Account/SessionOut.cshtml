@@ -1,0 +1,35 @@
+﻿@model HRMS.Models.LoginViewModel
+@{
+    Layout = null;
+    ViewBag.Title = "SessionOut";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="~/Content/css/bootstrap.css" rel="stylesheet" />
+    <link href="~/Content/vendors/bootstrap-icons/bootstrap-icons.css" rel="stylesheet" />
+    <link href="~/Content/css/app.css" rel="stylesheet" />
+    <link href="~/Content/css/pages/auth.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="text-center">
+        <h2 class="font-bold">Session Time Out</h2>
+        <div>
+            Your Secured Connection has been timeout.<br />
+            You can go back to login page <br />
+            <a href="~/Account/Login" class="btn btn-primary">Login</a>
+        </div>
+    </div>
+</body>
+</html>
+
+<script>
+    function SessionReset() {
+        sessionStorage.removeItem('sessionFlag');
+    }
+</script>

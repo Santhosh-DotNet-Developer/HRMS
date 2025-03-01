@@ -1,0 +1,176 @@
+﻿@model HRMS.Models.COUNTRy
+@{
+    Layout = null;
+    if (Model.CNTRY_CRE_BY == null)
+    {
+        ViewBag.Title = "Country - Add New";
+    }
+    else
+    {
+        ViewBag.Title = "Country - Edit";
+    }
+}
+
+<div class="modal-header">
+    <h5 class="modal-title" id="countryModalLabel">@ViewBag.Title</h5>
+    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><i class="bi bi-x"></i></button>
+</div>
+<div class="modal-body">
+    @using (Html.BeginForm("SaveCountry", "CityStateCountry", FormMethod.Post, new { @id = "frmCountry" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(h => h.CNTRY_CRE_BY)
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label><strong>Country Code</strong><span class="mantSpan"> *</span></label>
+                    @if (Model.CNTRY_CRE_BY == null)
+                    {
+                        @Html.TextBoxFor(m => m.CNTRY_CODE, new { @class = "form-control", @maxlength = "10", @placeholder = "Enter Country Code", @autocomplete = "off", @onkeypress = "return /[A-Za-z ]/.test(event.key)" })
+                    }
+                    else
+                    {
+                        @Html.TextBoxFor(m => m.CNTRY_CODE, new { @class = "form-control", @maxlength = "10", @placeholder = "Enter Country Code", @autocomplete = "off", @onkeypress = "return /[A-Za-z ]/.test(event.key)", @disabled = "disabled" })
+                        @Html.HiddenFor(h => h.CNTRY_CODE)
+                    }
+                    <label id="CNTRY_CODE_Error" class="error text-danger mt-2" style="display:none"></label>
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label><strong>Country Name</strong><span class="mantSpan"> *</span></label>
+                    @Html.TextBoxFor(m => m.CNTRY_NAME, new { @class = "form-control", @maxlength = "30", @placeholder = "Enter Country Name", @autocomplete = "off", @onkeypress = "return /[A-Za-z ]/.test(event.key)" })
+                    <label id="CNTRY_NAME_Error" class="error text-danger mt-2" style="display:none"></label>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-primary btnSave">Save</button>
+    <button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">Close</button>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#frmCountry").validate({
+            rules: {
+                'CNTRY_CODE': {
+                    required: true
+                },
+                'CNTRY_NAME': {
+                    required: true
+                }
+            },
+            messages: {
+                'CNTRY_CODE': {
+                    required: 'Country Code must be entered'
+                },
+                'CNTRY_NAME': {
+                    required: 'Country Name must be entered'
+                }
+            },
+            errorPlacement: function (label, element) {
+                label.addClass('mt-2 text-danger');
+                label.insertAfter(element);
+            },
+            highlight: function (element, errorClass) {
+                $(element).parent().addClass('has-danger')
+                $(element).addClass('form-control-danger')
+            }, errorPlacement: function (label, element) {
+                if (element.parent('.input-group').length) {
+                    label.insertAfter(element.parent());
+                    label.addClass('mt-2 text-danger');
+                    // radio/checkbox?
+                } else if (element.hasClass('select2')) {
+                    label.insertAfter(element.next('span'));
+                    label.addClass('mt-2 text-danger');
+                    // select2
+                } else {
+                    label.insertAfter(element);
+                    label.addClass('mt-2 text-danger');
+                    // default
+                }
+            }
+        });
+
+        $("#CNTRY_CODE").on("blur", function () {
+            CheckCountryCodeExists();
+        });
+
+        function CheckCountryCodeExists() {
+            if ('@Model.CNTRY_CRE_BY' == '') {
+                var inCountryCode = $("#CNTRY_CODE").val();
+                var inCountryCodeTrim = inCountryCode.trim();
+                var inCountryCodeLength = inCountryCode.length;
+                if (inCountryCodeLength > 0 && inCountryCodeTrim == "") {
+                    $("#CNTRY_CODE_Error").css('display', 'block').text('Country Code must be entered');
+                    $("#CNTRY_CODE").val(inCountryCodeTrim);
+                }
+                else {
+                    if (inCountryCodeTrim != "") {
+                        var parm = { "inCountryCode": inCountryCodeTrim };
+                        $.getJSON("/CityStateCountry/CheckCountryCodeExists", parm,
+                            function (data) {
+                                if (data == true) {
+                                    $("#CNTRY_CODE_Error").css('display', 'block').text('Country Code Already Exists');
+                                    $("#CNTRY_CODE").val(inCountryCodeTrim);
+                                }
+                                else {
+                                    $("#CNTRY_CODE_Error").css('display', 'none').text('');
+                                }
+                            });
+                    }
+                }
+            }
+        }
+
+        $("#CNTRY_NAME").on("blur", function () {
+            CheckCountryNameExists();
+        });
+
+        function CheckCountryNameExists() {
+            var inCountryName = $("#CNTRY_NAME").val();
+            var inCountryNameTrim = inCountryName.trim();
+            var inCountryNameLength = inCountryName.length;
+            if (inCountryNameLength > 0 && inCountryNameTrim == "") {
+                $("#CNTRY_NAME_Error").css('display', 'block').text('Country Name must be entered');
+                $("#CNTRY_NAME").val(inCountryNameTrim);
+            }
+            else {
+                if (inCountryNameTrim != "") {
+                    var inCountryCode = '@Model.CNTRY_CODE';
+                    var inCreBy = '@Model.CNTRY_CRE_BY';
+                    var parm = { "inCountryName": inCountryNameTrim, "inCountryCode": inCountryCode, "inCreBy": inCreBy };
+                    $.getJSON("/CityStateCountry/CheckCountryNameExists", parm,
+                        function (data) {
+                            if (data == true) {
+                                $("#CNTRY_NAME_Error").css('display', 'block').text('Country Name Already Exists');
+                                $("#CNTRY_NAME").val(inCountryNameTrim);
+                            }
+                            else {
+                                $("#CNTRY_NAME_Error").css('display', 'none').text('');
+                            }
+                        });
+                }
+            }
+        }
+
+        $('.btnSave').on('click', function () {
+            debugger
+            $.ajaxSetup({
+                async: false
+            });
+
+            if ($("#frmCountry").valid()) {
+                CheckCountryCodeExists();
+                CheckCountryNameExists();
+                var error = $('.error').text();
+                if (error == "") {
+                    $("#frmCountry").submit();
+                }
+            }
+        });
+    });
+</script>
+

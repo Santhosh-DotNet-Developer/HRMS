@@ -1,0 +1,219 @@
+﻿@model HRMS.Models.RoleAccessModel
+@{
+    Layout = null;
+    if (Model.RoleData.ROLE_ID == 0)
+    {
+        ViewBag.Title = "Role - Add New";
+    }
+    else
+    {
+        ViewBag.Title = "Role - Edit";
+    }
+    int count = Model.RoleAccessList.Where(w => w.RA_FLAG == true).Count();
+}
+
+<style>
+    .dataTable-sorter {
+        display: contents;
+    }
+
+    .form-check {
+        justify-self: center;
+    }
+
+    .dataTable-pagination {
+        display: none;
+    }
+</style>
+
+<div class="modal-header">
+    <h5 class="modal-title" id="roleModalLabel">@ViewBag.Title</h5>
+    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><i class="bi bi-x"></i></button>
+</div>
+<div class="modal-body">
+    @using (Html.BeginForm("Save", "RoleAccess", FormMethod.Post, new { @id = "frmRoleAccess" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(h => h.RoleData.ROLE_ID)
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label><strong>Role</strong><span class="mantSpan"> *</span></label>
+                    @if(Model.RoleData.ROLE_ID == 0)
+                    {
+                        @Html.TextBoxFor(m => m.RoleData.ROLE_DESC, new { @class = "form-control", @maxlength = "50", @placeholder = "Enter Role", @autocomplete = "off", @onkeypress = "return /[A-Za-z ]/.test(event.key)" })
+                    }
+                    else
+                    {
+                        @Html.TextBoxFor(m => m.RoleData.ROLE_DESC, new { @class = "form-control", @disabled = "disabled" })
+                    }
+                    <label id="ROLE_DESC_Error" class="error text-danger mt-2" for="RoleData.ROLE_DESC" style="display:none"></label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <table class="table table-bordered table-hover" id="datatable">
+                    <thead>
+                        <tr>
+                            <th style="width:10%">S. No.</th>
+                            <th style="width:80%">Screen</th>
+                            <th style="width:10%;">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input form-check-secondary check-Parent" style="border-radius: 0;">
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{int i = 0;}
+                        @for (int j = 0; j < Model.RoleAccessList.Count(); j++)
+                        {
+                            <tr>
+                                <td style="width:10%">@(i = i + 1)</td>
+                                <td style="width:80%">
+                                    @Model.RoleAccessList[j].RA_FORM_NAME 
+                                    @Html.HiddenFor(s => s.RoleAccessList[j].RA_FORM_ID)
+                                </td>
+                                <td style="width:10%;">
+                                    <div class="form-check">
+                                        @Html.CheckBoxFor(m => m.RoleAccessList[j].RA_FLAG, new { @class = "form-check-input form-check-secondary check-Child", @name = "input[]", @style = "border-radius:0;" })
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+    }
+</div>
+<div class="modal-footer">
+    @if(Model.RoleData.ROLE_ID == 0)
+    {
+        <button type="button" class="btn btn-primary btnSave">Save</button>
+    }
+    else
+    {
+        <button type="button" class="btn btn-primary btnSave">Update</button>
+    }
+    <button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">Close</button>
+</div>
+
+<script>
+    $(document).ready(function () {
+        var dataTable = new simpleDatatables.DataTable("#datatable", {
+            searchable: false,
+            perPageSelect: false,
+            pagination: { enabled: false },
+            labels: {
+                perPage: "",
+                info: ""
+            },
+            perPage: 50
+        });
+
+        if ('@count' == $('.check-Child').length) {
+            $('.check-Parent').prop('checked', true);
+        }
+
+        $('.check-Parent').click(function () {
+            $('.check-Child').prop('checked', $(this).prop('checked'));
+        });
+
+        $('.check-Child').click(function () {
+            if (!$(this).prop('checked')) {
+                $('.check-Parent').prop('checked', false);
+            } else {
+                if ($('.check-Child:checked').length === $('.check-Child').length) {
+                    $('.check-Parent').prop('checked', true);
+                }
+            }
+        });
+
+        $("#frmRoleAccess").validate({
+            rules: {
+                'RoleData.ROLE_DESC': {
+                    required: true
+                }
+            },
+            messages: {
+                'RoleData.ROLE_DESC': {
+                    required: 'Role must be entered'
+                }
+            },
+            errorPlacement: function (label, element) {
+                label.addClass('mt-2 text-danger');
+                label.insertAfter(element);
+            },
+            highlight: function (element, errorClass) {
+                $(element).parent().addClass('has-danger')
+                $(element).addClass('form-control-danger')
+            }, errorPlacement: function (label, element) {
+                if (element.parent('.input-group').length) {
+                    label.insertAfter(element.parent());
+                    label.addClass('mt-2 text-danger');
+                    // radio/checkbox?
+                } else if (element.hasClass('select2')) {
+                    label.insertAfter(element.next('span'));
+                    label.addClass('mt-2 text-danger');
+                    // select2
+                } else {
+                    label.insertAfter(element);
+                    label.addClass('mt-2 text-danger');
+                    // default
+                }
+            }
+        });
+
+        $("#RoleData_ROLE_DESC").blur(function () {
+            CheckRoleExist();
+        });
+
+        function CheckRoleExist() {
+            if ('@Model.RoleData.ROLE_ID' == 0) {
+                var inRoleDesc = $("#RoleData_ROLE_DESC").val();
+                var inRoleDescTrim = inRoleDesc.trim();
+                var inRoleDescLength = inRoleDesc.length;
+                if (inRoleDescLength > 0 && inRoleDescTrim == "") {
+                    $("#ROLE_DESC_Error").css('display', 'block').text('Role must be entered');
+                    $("#RoleData_ROLE_DESC").val(inRoleDescTrim);
+                }
+                else {
+                    if (inRoleDescTrim != "") {
+                        var parm = { "inRoleDesc": inRoleDescTrim };
+                        $.getJSON("/RoleAccess/CheckRoleExists", parm,
+                            function (data) {
+                                if (data == true) {
+                                    $("#ROLE_DESC_Error").css('display', 'block').text('Role Already Exists');
+                                    $("#RoleData_ROLE_DESC").val(inRoleDescTrim);
+                                }
+                                else {
+                                    $("#ROLE_DESC_Error").css('display', 'none').text('');
+                                    $("#RoleData_ROLE_DESC").val(inRoleDescTrim);
+                                }
+                            });
+                    }
+                }
+            }
+        }
+
+        $('.btnSave').on('click', function () {
+            $.ajaxSetup({
+                async: false
+            });
+
+            if ($("#frmRoleAccess").valid()) {
+                CheckRoleExist();
+                var error = $('.error').text();
+                if (error == "") {
+                    $("#frmRoleAccess").submit();
+                }
+            }
+            else {
+                $("#RoleData_ROLE_DESC").focus();
+            }
+        });
+    });
+</script>

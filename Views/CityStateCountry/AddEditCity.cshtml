@@ -1,0 +1,145 @@
+﻿@model HRMS.Models.CITy
+@{
+    Layout = null;
+    if (Model.CITY_CRE_BY == null)
+    {
+        ViewBag.Title = "City - Add New";
+    }
+    else
+    {
+        ViewBag.Title = "City - Edit";
+    }
+}
+
+<div class="modal-header">
+    <h5 class="modal-title" id="cityModalLabel">@ViewBag.Title</h5>
+    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><i class="bi bi-x"></i></button>
+</div>
+<div class="modal-body">
+    @using (Html.BeginForm("SaveCity", "CityStateCountry", FormMethod.Post, new { @id = "frmCity" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(h => h.CITY_ID)
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label><strong>City Name</strong><span class="mantSpan"> *</span></label>
+                    @Html.TextBoxFor(m => m.CITY_NAME, new { @class = "form-control", @maxlength = "30", @placeholder = "Enter City Name", @autocomplete = "off", @onkeypress = "return /[A-Za-z ]/.test(event.key)" })
+                    <label id="CITY_NAME_Error" class="error text-danger mt-2" for="CITY_NAME" style="display:none"></label>
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label><strong>State</strong><span class="mantSpan"> *</span></label>
+                    @if (Model.CITY_ID == 0)
+                    {
+                        @Html.DropDownListFor(m => m.CITY_STATE_CODE, new SelectList(HRMS.Models.DropDownList.GetStates(), "id", "text"), new { @class = "form-control select2", @data_placeholder = "Select State", @style = "width:100%" })
+                    }
+                    else
+                    {
+                        @Html.DropDownListFor(m => m.CITY_STATE_CODE, new SelectList(HRMS.Models.DropDownList.GetStates(), "id", "text"), new { @class = "form-control select2", @data_placeholder = "Select State", @style = "width:100%", @disabled = "disabled" })
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-primary btnSave">Save</button>
+    <button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">Close</button>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $(".select2").select2({
+            allowClear: true,
+            dropdownParent: $('#cityModalLabel')
+        });
+
+        $("#frmCity").validate({
+            rules: {
+                'CITY_NAME': {
+                    required: true
+                },
+                'CITY_STATE_CODE': {
+                    required: true
+                }
+            },
+            messages: {
+                'CITY_NAME': {
+                    required: 'City Name must be entered'
+                },
+                'CITY_STATE_CODE': {
+                    required: 'State must be selected'
+                }
+            },
+            errorPlacement: function (label, element) {
+                label.addClass('mt-2 text-danger');
+                label.insertAfter(element);
+            },
+            highlight: function (element, errorClass) {
+                $(element).parent().addClass('has-danger')
+                $(element).addClass('form-control-danger')
+            }, errorPlacement: function (label, element) {
+                if (element.parent('.input-group').length) {
+                    label.insertAfter(element.parent());
+                    label.addClass('mt-2 text-danger');
+                    // radio/checkbox?
+                } else if (element.hasClass('select2')) {
+                    label.insertAfter(element.next('span'));
+                    label.addClass('mt-2 text-danger');
+                    // select2
+                } else {
+                    label.insertAfter(element);
+                    label.addClass('mt-2 text-danger');
+                    // default
+                }
+            }
+        });
+
+        $("#CITY_NAME").on("blur", function () {
+            CheckCityNameExists();
+        });
+
+        function CheckCityNameExists() {
+            var inCityName = $("#CITY_NAME").val();
+            var inCityNameTrim = inCityName.trim();
+            var inCityNameLength = inCityName.length;
+            if (inCityNameLength > 0 && inCityNameTrim == "") {
+                $("#CITY_NAME_Error").css('display', 'block').text('City Name must be entered');
+                $("#CITY_NAME").val(inCityNameTrim);
+            }
+            else {
+                if (inCityNameTrim != "") {
+                var inCityId = '@Model.CITY_ID';
+                var inCreBy = '@Model.CITY_CRE_BY';
+                var parm = { "inCityName": inCityNameTrim, "inCityId": inCityId, "inCreBy": inCreBy };
+                $.getJSON("/CityStateCountry/CheckCityNameExists", parm,
+                    function (data) {
+                        if (data == true) {
+                            $("#CITY_NAME").val(inCityNameTrim);
+                            $("#CITY_NAME_Error").css('display', 'block').text('City Already Exists');
+                        }
+                        else {
+                            $("#CITY_NAME_Error").css('display', 'none').text('');
+                        }
+                    });
+                }
+            }
+        }
+
+        $('.btnSave').on('click', function () {
+            $.ajaxSetup({
+                async: false
+            });
+
+            if ($("#frmCity").valid()) {
+                CheckCityNameExists();
+                var error = $('.error').text();
+                if (error == "") {
+                    $("#frmCity").submit();
+                }
+            }
+        });
+    });
+</script>

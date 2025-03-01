@@ -1,0 +1,193 @@
+﻿@model Tuple<List<HRMS.Models.CITy>, List<HRMS.Models.STATE>, List<HRMS.Models.COUNTRy>>
+@{
+    ViewBag.Title = "City/State/Country";
+    ViewBag.Parent = "Configuration";
+    var curTab = ViewBag.CurTab;
+}
+
+<div id="main-content">
+    <div class="page-heading">
+        <div class="page-title">
+            <div class="row">
+                <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="~/Home/Index">Home</a></li>
+                        <li class="breadcrumb-item">@ViewBag.Parent</li>
+                        <li class="breadcrumb-item active">@ViewBag.Title</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <section class="section">
+            <div class="card">
+                <div class="card-body">
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link active" id="city-tab" data-bs-toggle="tab" href="#city" role="tab" aria-controls="city" aria-selected="true">City</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="state-tab" data-bs-toggle="tab" href="#state" role="tab" aria-controls="state" aria-selected="false">State</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="country-tab" data-bs-toggle="tab" href="#country" role="tab" aria-controls="country" aria-selected="false">Country</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="myTabContent">
+                        <div class="tab-pane fade show active" id="city" role="tabpanel" aria-labelledby="city-tab">
+                            <div class="card">
+                                <div class="card-header">
+                                    <a href="~/CityStateCountry/AddCity?inCityId=0" data-bs-toggle="modal" data-bs-target="#cityModalPopUp" class="btn btn-primary float-end">Add City</a>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-hover" id="datatable">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width:10%">S. No.</th>
+                                                        <th style="width:40%">City</th>
+                                                        <th style="width:40%">State</th>
+                                                        <th style="width:10%">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @{int i = 0;}
+                                                    @foreach (var city in Model.Item1)
+                                                    {
+                                                        <tr>
+                                                            <td style="width:10%">@(i = i + 1)</td>
+                                                            <td style="width:40%">@city.CITY_NAME</td>
+                                                            <td style="width:40%">@HRMS.Models.DropDownList.GetStateName(city.CITY_STATE_CODE)</td>
+                                                            <td style="width:10%" class="text-center">
+                                                                <a href="~/CityStateCountry/AddCity?inCityId=@city.CITY_ID" data-bs-toggle="modal" data-bs-target="#cityModalPopUp" class="edit"><i class="bi bi-pencil-square"></i></a>
+                                                                <a href="~/CityStateCountry/DeleteCity?inCityId=@city.CITY_ID" title="Delete" class="delete"><i class="bi bi-trash"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="state" role="tabpanel" aria-labelledby="state-tab">
+                            <div class="card">
+                                <div class="card-header">
+                                    <a href="~/CityStateCountry/AddState?inStateCode=" data-bs-toggle="modal" data-bs-target="#stateModalPopUp" class="btn btn-primary float-end">Add State</a>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-hover" id="datatable1">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width:10%">S. No.</th>
+                                                        <th style="width:20%">State Code</th>
+                                                        <th style="width:40%">State Name</th>
+                                                        <th style="width:20%">Country</th>
+                                                        <th style="width:10%">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @{int j = 0;}
+                                                    @foreach (var state in Model.Item2)
+                                                    {
+                                                        <tr>
+                                                            <td style="width:10%">@(j = j + 1)</td>
+                                                            <td style="width:20%">@state.STATE_CODE</td>
+                                                            <td style="width:40%">@state.STATE_NAME</td>
+                                                            <td style="width:20%">@HRMS.Models.DropDownList.GetCountryName(state.STATE_CNTRY_CODE)</td>
+                                                            <td style="width:10%" class="text-center">
+                                                                <a href="~/CityStateCountry/AddState?inStateCode=@state.STATE_CODE" data-bs-toggle="modal" data-bs-target="#stateModalPopUp" class="edit"><i class="bi bi-pencil-square"></i></a>
+                                                                <a href="~/CityStateCountry/DeleteState?inStateCode=@state.STATE_CODE" title="Delete" class="delete"><i class="bi bi-trash"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="country" class="tab-pane fade" role="tabpanel" aria-labelledby="country-tab">
+                            <div class="card">
+                                <div class="card-header">
+                                    <a href="~/CityStateCountry/AddCountry?inCountryCode=" data-bs-toggle="modal" data-bs-target="#countryModalPopUp" class="btn btn-primary float-end">Add Country</a>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-hover" id="datatable2">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width:10%">S. No.</th>
+                                                        <th style="width:40%">Country Code</th>
+                                                        <th style="width:40%">Country Name</th>
+                                                        <th style="width:10%">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @{int k = 0;}
+                                                    @foreach (var country in Model.Item3)
+                                                    {
+                                                        <tr>
+                                                            <td style="width:10%">@(k = k + 1)</td>
+                                                            <td style="width:40%">@country.CNTRY_CODE</td>
+                                                            <td style="width:40%">@country.CNTRY_NAME</td>
+                                                            <td style="width:10%" class="text-center">
+                                                                <a href="~/CityStateCountry/AddCountry?inCountryCode=@country.CNTRY_CODE" data-bs-toggle="modal" data-bs-target="#countryModalPopUp" class="edit"><i class="bi bi-pencil-square"></i></a>
+                                                                <a href="~/CityStateCountry/DeleteCountry?inCountryCode=@country.CNTRY_CODE" title="Delete" class="delete"><i class="bi bi-trash"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<div class="modal fade" id="cityModalPopUp" tabindex="-1" aria-labelledby="cityModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="stateModalPopUp" tabindex="-1" aria-labelledby="stateModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="countryModalPopUp" tabindex="-1" aria-labelledby="countryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#loading").hide();
+        if ('@curTab' == "Country") {
+            $('#country-tab').tab('show');
+        }
+        else if ('@curTab' == "State") {
+            $('#state-tab').tab('show');
+        }
+        else {
+            $('#city-tab').tab('show');
+        }
+    });
+</script>

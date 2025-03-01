@@ -1,0 +1,70 @@
+﻿@model List<HRMS.Models.ROLE>
+@{
+    ViewBag.Title = "Role/Role Access";
+    ViewBag.Parent = "Configuration";
+}
+
+<div id="main-content">
+    <div class="page-heading">
+        <div class="page-title">
+            <div class="row">
+                <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="~/Home/Index">Home</a></li>
+                        <li class="breadcrumb-item">@ViewBag.Parent</li>
+                        <li class="breadcrumb-item active">@ViewBag.Title</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <section class="section">
+            <div class="card">
+                <div class="card-header">
+                    <a href="~/RoleAccess/AddEdit?inRoleId=0" data-bs-toggle="modal" data-bs-target="#roleModalPopUp" class="btn btn-primary float-end">Add Role</a>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover" id="datatable1">
+                                <thead>
+                                    <tr>
+                                        <th style="width:10%">S. No.</th>
+                                        <th style="width:80%">Role</th>
+                                        <th style="width:10%">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{int i = 0;}
+                                    @foreach (var role in Model)
+                                    {
+                                        <tr>
+                                            <td style="width:10%">@(i = i + 1)</td>
+                                            <td style="width:80%">@role.ROLE_DESC</td>
+                                            <td style="width:10%" class="text-center">
+                                                <a href="~/RoleAccess/AddEdit?inRoleId=@role.ROLE_ID" data-bs-toggle="modal" data-bs-target="#roleModalPopUp" class="edit"><i class="bi bi-pencil-square"></i></a>
+                                                <a href="~/RoleAccess/Delete?inRoleId=@role.ROLE_ID" title="Delete" class="delete"><i class="bi bi-trash"></i></a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<div class="modal fade" id="roleModalPopUp" tabindex="-1" aria-labelledby="roleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#loading").hide();
+    });
+</script>
