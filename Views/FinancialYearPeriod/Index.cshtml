@@ -1,0 +1,115 @@
+﻿@model List<HRMS.Models.FINANCIAL_YEAR>
+@{
+    ViewBag.Title = "Financial Year/Period";
+    ViewBag.Parent = "Configuration";
+    Int16 BE = Convert.ToInt16(HttpContext.Current.Request.Cookies[Constant.BE].Value);
+    HRMS.Models.HRMSEntities db = new HRMS.Models.HRMSEntities();
+    int inMaxFinYear = db.FINANCIAL_YEAR.Where(w => w.FY_BE == BE).Select(s => s.FY_YEAR).DefaultIfEmpty(0).Max();
+    int inCurrentFinYear = DateTime.Now.Year;
+}
+
+<div id="main-content">
+    <div class="page-heading">
+        <div class="page-title">
+            <div class="row">
+                <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="~/Home/Index">Home</a></li>
+                        <li class="breadcrumb-item">@ViewBag.Parent</li>
+                        <li class="breadcrumb-item active">@ViewBag.Title</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <section class="section">
+            <div class="card">
+                <div class="card-header">
+                    <a href="~/FinancialYearPeriod/AddEditYearPeriod?inYear=0" data-bs-toggle="modal" data-bs-target="#finYearPeriodModalPopUp" class="btn btn-primary float-end checkExists">Add Year/Period</a>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover" id="datatable">
+                                <thead>
+                                    <tr>
+                                        <th style="width:10%">S. No.</th>
+                                        <th style="width:20%">Financial Year</th>
+                                        <th style="width:25%">Start Date</th>
+                                        <th style="width:25%">End Date</th>
+                                        <th style="width:10%">Status</th>
+                                        <th style="width:10%">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{int i = 0;}
+                                    @foreach (var finYear in Model)
+                                    {
+                                        <tr>
+                                            <td style="width:10%">@(i = i + 1)</td>
+                                            <td style="width:20%">@finYear.FY_YEAR</td>
+                                            @if (finYear.FY_START_DATE != null)
+                                            {
+                                                <td style="width:25%">@finYear.FY_START_DATE.ToString("dd-MM-yyyy")</td>
+                                            }
+                                            else
+                                            {
+                                                <td></td>
+                                            }
+                                            @if (finYear.FY_END_DATE != null)
+                                            {
+                                                <td style="width:25%">@finYear.FY_END_DATE.ToString("dd-MM-yyyy")</td>
+                                            }
+                                            else
+                                            {
+                                                <td></td>
+                                            }
+                                            <td style="width:10%" class="text-center">
+                                                @if (finYear.FY_STATUS == "O")
+                                                {
+                                                    <span class="badge bg-success">Open</span>
+                                                }
+                                                else if (finYear.FY_STATUS == "U")
+                                                {
+                                                    <span class="badge bg-primary">Current</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger">Closed</span>
+                                                }
+                                            </td>
+                                            <td style="width:10%" class="text-center">
+                                                <a href="~/FinancialYearPeriod/AddEditYearPeriod?inYear=@finYear.FY_YEAR" data-bs-toggle="modal" data-bs-target="#finYearPeriodModalPopUp" class="edit" title="Edit"><i class="bi bi-pencil-square"></i></a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<div class="modal fade" id="finYearPeriodModalPopUp" tabindex="-1" aria-labelledby="finYearPeriodModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#loading").hide();
+
+        if ('@inMaxFinYear' == '@inCurrentFinYear') {
+            $(".checkExists").attr("disabled", true);
+            $(".checkExists").css({
+                'pointer-events': 'none',
+                'cursor': 'default',
+                'opacity': '0.6'
+            });
+        }
+    });
+</script>

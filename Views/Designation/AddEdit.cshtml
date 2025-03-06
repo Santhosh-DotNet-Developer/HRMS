@@ -1,0 +1,174 @@
+﻿@model HRMS.Models.DESIGNATION
+@{
+    Layout = null;
+    if (Model.DESG_CRE_BY == null)
+    {
+        ViewBag.Title = "Designation - Add New";
+    }
+    else
+    {
+        ViewBag.Title = "Designation - Edit";
+    }
+}
+
+<div class="modal-header">
+    <h5 class="modal-title" id="desgModalLabel">@ViewBag.Title</h5>
+    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><i class="bi bi-x"></i></button>
+</div>
+<div class="modal-body">
+    @using (Html.BeginForm("Save", "Designation", FormMethod.Post, new { @id = "frmDesignation" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(h => h.DESG_CRE_BY)
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label><strong>Designation Code</strong><span class="mantSpan"> *</span></label>
+                    @if (Model.DESG_CRE_BY == null)
+                    {
+                        @Html.TextBoxFor(m => m.DESG_CODE, new { @class = "form-control", @maxlength = "10", @placeholder = "Enter Designation Code", @autocomplete = "off", @onkeypress = "return /[A-Za-z ]/.test(event.key)" })
+                    }
+                    else
+                    {
+                        @Html.TextBoxFor(m => m.DESG_CODE, new { @class = "form-control", @disabled = "disabled" })
+                        @Html.HiddenFor(h => h.DESG_CODE)
+                    }
+                    <label id="DESG_CODE_Error" class="error text-danger mt-2" for="DESG_CODE" style="display:none"></label>
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label><strong>Designation Name</strong><span class="mantSpan"> *</span></label>
+                    @Html.TextBoxFor(m => m.DESG_NAME, new { @class = "form-control", @maxlength = "30", @placeholder = "Enter Designation Name", @autocomplete = "off", @onkeypress = "return /[A-Za-z ]/.test(event.key)" })
+                    <label id="DESG_NAME_Error" class="error text-danger mt-2" for="DESG_NAME" style="display:none"></label>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-primary btnSave">Save</button>
+    <button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">Close</button>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#frmDesignation").validate({
+            rules: {
+                'DESG_CODE': {
+                    required: true
+                },
+                'DESG_NAME': {
+                    required: true
+                }
+            },
+            messages: {
+                'DESG_CODE': {
+                    required: 'Designation Code must be entered'
+                },
+                'DESG_NAME': {
+                    required: 'Designation Name must be entered'
+                }
+            },
+            errorPlacement: function (label, element) {
+                label.addClass('mt-2 text-danger');
+                label.insertAfter(element);
+            },
+            highlight: function (element, errorClass) {
+                $(element).parent().addClass('has-danger')
+                $(element).addClass('form-control-danger')
+            }, errorPlacement: function (label, element) {
+                if (element.parent('.input-group').length) {
+                    label.insertAfter(element.parent());
+                    label.addClass('mt-2 text-danger');
+                    // radio/checkbox?
+                } else if (element.hasClass('select2')) {
+                    label.insertAfter(element.next('span'));
+                    label.addClass('mt-2 text-danger');
+                    // select2
+                } else {
+                    label.insertAfter(element);
+                    label.addClass('mt-2 text-danger');
+                    // default
+                }
+            }
+        });
+
+        $("#DESG_CODE").blur(function () {
+            CheckDesgCodeExists();
+        });
+
+        function CheckDesgCodeExists() {
+            if ('@Model.DESG_CRE_BY' == '') {
+                var inDesgCode = $("#DESG_CODE").val();
+                var inDesgCodeTrim = inDesgCode.trim();
+                var inDesgCodeLength = inDesgCode.length;
+                if (inDesgCodeLength > 0 && inDesgCodeTrim == "") {
+                    $("#DESG_CODE_Error").css('display', 'block').text('Designation Code must be entered');
+                    $("#DESG_CODE").val(inDesgCodeTrim);
+                }
+                else {
+                    if (inDesgCodeTrim != "") {
+                        var parm = { "inDesgCode": inDesgCodeTrim };
+                        $.getJSON("/Designation/CheckDesgCodeExists", parm,
+                            function (data) {
+                                if (data == true) {
+                                    $("#DESG_CODE_Error").css('display', 'block').text('Designation Code Already Exists');
+                                    $("#DESG_CODE").val(inDesgCodeTrim);
+                                }
+                                else {
+                                    $("#DESG_CODE_Error").css('display', 'none').text('');
+                                }
+                            });
+                    }
+                }
+            }
+        }
+
+        $("#DESG_NAME").blur(function () {
+            CheckDesgNameExists();
+        });
+
+        function CheckDesgNameExists() {
+            var inDesgName = $("#DESG_NAME").val();
+            var inDesgNameTrim = inDesgName.trim();
+            var inDesgNameLength = inDesgName.length;
+            if (inDesgNameLength > 0 && inDesgNameTrim == "") {
+                $("#DESG_NAME_Error").css('display', 'block').text('Designation Name must be entered');
+                $("#DESG_NAME").val(inDesgNameTrim);
+            }
+            else {
+                if (inDesgNameTrim != "") {
+                    var inDesgCode = '@Model.DESG_CODE';
+                    var inCreBy = '@Model.DESG_CRE_BY';
+                    var parm = { "inDesgName": inDesgNameTrim, "inDesgCode": inDesgCode, "inCreBy": inCreBy };
+                    $.getJSON("/Designation/CheckDesgNameExists", parm,
+                        function (data) {
+                            if (data == true) {
+                                $("#DESG_NAME_Error").css('display', 'block').text('Designation Name Already Exists');
+                                $("#DESG_NAME").val(inDesgNameTrim);
+                            }
+                            else {
+                                $("#DESG_NAME_Error").css('display', 'none').text('');
+                            }
+                        });
+                }
+            }
+        }
+
+        $('.btnSave').on('click', function () {
+            $.ajaxSetup({
+                async: false
+            });
+
+            if ($("#frmDesignation").valid()) {
+                CheckDesgCodeExists();
+                CheckDesgNameExists();
+                var error = $('.error').text();
+                if (error == "") {
+                    $("#frmDesignation").submit();
+                }
+            }
+        });
+    });
+</script>

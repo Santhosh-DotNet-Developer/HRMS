@@ -1,0 +1,274 @@
+﻿@model HRMS.Models.PERMISSION_REQUEST
+@{
+    Layout = null;
+    if (Model.PR_CRE_BY == null)
+    {
+        ViewBag.Title = "Permission Request - Add New";
+    }
+    else
+    {
+        ViewBag.Title = "Permission Request - Edit";
+    }
+    Int16 BE = Convert.ToInt16(HttpContext.Current.Request.Cookies[Constant.BE].Value);
+    string empCode = HttpContext.Current.Request.Cookies[Constant.EmpCode].Value;
+    HRMS.Models.HRMSEntities db = new HRMS.Models.HRMSEntities();
+    var inFinYear = db.FINANCIAL_YEAR.Where(w => w.FY_BE == BE && w.FY_STATUS == "U").Select(s => s.FY_YEAR).SingleOrDefault();
+    var startDate = "01" + "-" + "01" + "-" + inFinYear;
+    var endDate = "31" + "-" + "12" + "-" + inFinYear;
+    string empName = HRMS.Models.DropDownList.GetEmployeeCodeName(empCode);
+    var curDate = DateTime.Now.Date.ToString("dd-MM-yyyy");
+}
+
+<style>
+    .ui-timepicker-container, ui-timepicker-standard {
+        z-index: 10000 !important;
+    }
+</style>
+
+<div class="modal-header" id="perReqModalLabel">
+    <h5 class="modal-title">@ViewBag.Title</h5>
+    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><i class="bi bi-x"></i></button>
+</div>
+<div class="modal-body">
+    @using (Html.BeginForm("Save", "PermissionRequest", FormMethod.Post, new { @id = "frmPermissionRequest" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(h => h.PR_ID)
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="form-control-label"><strong>Employee</strong></label>
+                    <input type="text" id="Employee" class="form-control" readonly="readonly" />
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="form-control-label"><strong>Permission Date</strong><span class="mantSpan"> *</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-calendar" style="height:auto"></i></span>
+                        @if (Model.PR_DATE == null)
+                        {
+                            @Html.TextBoxFor(m => m.PR_DATE, new { @class = "form-control pDate", @placeholder = "Select Permission Date", @readonly = "readonly" })
+                        }
+                        else
+                        {
+                            <input type="text" id="PR_DATE" name="PR_DATE" class="form-control pDate" value="@Model.PR_DATE.Value.ToString("dd-MM-yyyy")" readonly="readonly">
+                        }
+                    </div>
+                    <label id="PR_DATE_Error" class="error text-danger mt-2" for="PR_DATE" style="display:none"></label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <label class="form-control-label"><strong>Permission Hours</strong><span class="mantSpan"> *</span></label>
+                @Html.DropDownListFor(m => m.PR_HOURS, new SelectList(HRMS.Models.DropDownList.GetValues("PR"), "id", "text"), new { @class = "form-control select2", @data_placeholder = "Select Permission Hours", @style = "width:100%" })
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="form-control-label"><strong>Start Time</strong><span class="mantSpan"> *</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-clock" style="height:auto"></i></span>
+                        @Html.TextBoxFor(m => m.PR_START_TIME, new { @class = "form-control sTime", @placeholder = "Select Start Time", @readonly = "readonly" })
+                    </div>
+                    <label id="PR_START_TIME_Error" class="error text-danger mt-2" for="PR_START_TIME" style="display:none"></label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="form-control-label"><strong>End Time</strong><span class="mantSpan"> *</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-clock" style="height:auto"></i></span>
+                        @Html.TextBoxFor(m => m.PR_END_TIME, new { @class = "form-control eTime", @placeholder = "Select End Time", @disabled = "disabled" })
+                    </div>
+                    <label id="PR_END_TIME_Error" class="error text-danger mt-2" for="PR_END_TIME" style="display:none"></label>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <label class="form-control-label"><strong>Reason</strong><span class="mantSpan"> *</span></label>
+                @Html.TextAreaFor(m => m.PR_REASON, new { @class = "form-control", @placeholder = "Enter Reason" })
+            </div>
+        </div>
+    }
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-primary btnSave">Save</button>
+    <button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">Close</button>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $(".select2").select2({
+            allowClear: true,
+            dropdownParent: $('#perReqModalLabel')
+        });
+
+        $('.pDate').datepicker({
+            autoclose: true,
+            keyboardNavigation: false,
+            format: "dd-mm-yyyy",
+            todayBtn: "linked",
+            forceParse: false,
+            todayHighlight: true,
+            startDate: '@startDate',
+            endDate: '@endDate'
+        });
+
+        $('.sTime').timepicker({
+            timeFormat: 'HH:mm p',
+            interval: 30,
+            minTime: '09',
+            maxTime: '18:30pm',
+            dynamic: false,
+            dropdown: true,
+            scrollbar: true,
+            change: checkPermission
+        });
+
+        $('.eTime').timepicker({
+            timeFormat: 'HH:mm p',
+            interval: 30,
+            minTime: '09',
+            maxTime: '18:30pm',
+            dynamic: false,
+            dropdown: true,
+            scrollbar: true
+        });
+
+        $('#Employee').val('@empName');
+        $('#PR_DATE').val('@curDate');
+
+        $("#frmPermissionRequest").validate({
+            rules: {
+                'PR_DATE': {
+                    required: true
+                },
+                'PR_HOURS': {
+                    required: true
+                },
+                'PR_START_TIME': {
+                    required: true
+                },
+                'PR_REASON': {
+                    required: true
+                }
+            },
+            messages: {
+                'PR_DATE': {
+                    required: 'Permission Date must be selected'
+                },
+                'PR_HOURS': {
+                    required: 'Permission Hours must be selected'
+                },
+                'PR_START_TIME': {
+                    required: 'Start Time must be selected'
+                },
+                'PR_REASON': {
+                    required: 'Reason must be entered'
+                }
+            },
+            errorPlacement: function (label, element) {
+                label.addClass('mt-2 text-danger');
+                label.insertAfter(element);
+            },
+            highlight: function (element, errorClass) {
+                $(element).parent().addClass('has-danger')
+                $(element).addClass('form-control-danger')
+            }, errorPlacement: function (label, element) {
+                if (element.parent('.input-group').length) {
+                    label.insertAfter(element.parent());
+                    label.addClass('mt-2 text-danger');
+                    // radio/checkbox?
+                } else if (element.hasClass('select2')) {
+                    label.insertAfter(element.next('span'));
+                    label.addClass('mt-2 text-danger');
+                    // select2
+                } else {
+                    label.insertAfter(element);
+                    label.addClass('mt-2 text-danger');
+                    // default
+                }
+            }
+        });
+
+        $('#PR_HOURS').on('change', function () {
+            calculatePermissiontime();
+        });
+
+        $('.btnSave').on('click', function () {
+            if ($("#frmPermissionRequest").valid()) {
+                var error = $('.error').text();
+                if (error == "") {
+                    $('#PR_END_TIME').attr("disabled", false);
+                    $("#frmPermissionRequest").submit();
+                }
+            }
+        });
+    });
+
+    function checkPermission() {
+        var perStTime = $('#PR_START_TIME').val();
+        if (perStTime != "") {
+            //var timeParts = perStTime.split(' ');
+            //var formattedTime = timeParts[0] + ':' + '00';
+            var params = { "inEmpCode": '@empCode', "inPerTime": perStTime };
+            $.getJSON("/PermissionRequest/CheckPermissionExists", params,
+                function (result) {
+                    if (result) {
+                        swal({
+                            title: "Alert",
+                            text: '<span style="color:black">Permission already raised for this time.</span>',
+                            type: "warning",
+                            html: true
+                        });
+                        $('#PR_START_TIME').val("");
+                    }
+                    else {
+                        calculatePermissiontime();
+                    }
+                });
+        }
+    }
+
+    function calculatePermissiontime() {
+        var perStTime = $('#PR_START_TIME').val();
+        var perHours = $('#PR_HOURS').val();
+        if (perStTime != "" && perHours != '') {
+            var timeParts = perStTime.split(' ');
+            var hrsMin = timeParts[0].split(':');
+            var perEndTime = "";
+            var perMinutes = "";
+            if (perHours == "0.5") {
+                perMinutes = 30;
+            }
+            else if (perHours == "1") {
+                perMinutes = 60;
+            }
+            else if (perHours == "1.5") {
+                perMinutes = 90;
+            }
+            else if (perHours == "2") {
+                perMinutes = 120;
+            }
+            var hours = parseInt(hrsMin[0], 10);
+            var minutes = parseInt(hrsMin[1], 10) + perMinutes;
+            if (minutes >= 60) {
+                hours += Math.floor(minutes / 60);
+                minutes = minutes % 60;
+            }
+            if (hours >= 12) {
+                timeParts[1] = 'PM';
+            }
+            else {
+                timeParts[1] = 'AM';
+            }
+            perEndTime = hours + ':' + (minutes < 10 ? '0' + minutes : minutes) + ' ' + timeParts[1];
+            $('#PR_END_TIME').val(perEndTime);
+        }
+        else {
+            $('#PR_END_TIME').val("");
+        }
+    }
+</script>

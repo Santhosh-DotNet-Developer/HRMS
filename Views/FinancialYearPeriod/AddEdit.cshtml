@@ -1,0 +1,202 @@
+﻿@model Tuple<HRMS.Models.FINANCIAL_YEAR,List<HRMS.Models.FINANCIAL_PERIOD>>
+@{
+    Layout = null;
+    ViewBag.Title = "Financial Year/Period - Edit";
+}
+
+<style>
+    .dataTable-sorter {
+        display: contents;
+    }
+</style>
+
+<div class="modal-header">
+    <h5 class="modal-title" id="finYearPeriodModalLabel">@ViewBag.Title</h5>
+</div>
+<div class="modal-body">
+    @using (Html.BeginForm("Update", "FinancialYearPeriod", FormMethod.Post, new { @id = "frmFinYearPeriod" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(h => h.Item1.FY_YEAR)
+        <div class="row">
+            <div class="col-sm-3">
+                <div class="form-group">
+                    <label><strong>Year</strong><span class="mantSpan"> *</span></label>
+                    @Html.TextBoxFor(m => m.Item1.FY_YEAR, new { @class = "form-control", @disabled = "disabled" })
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="form-group">
+                    <label><strong>Start Date</strong><span class="mantSpan"> *</span></label>
+                    <div class="input-group date">
+                        <span class="input-group-text"><i class="bi bi-calendar" style="height:auto"></i></span>
+                        <input type="text" id="Item1_FY_START_DATE" name="Item1.FY_START_DATE" class="form-control" value="@Model.Item1.FY_START_DATE.ToString("dd-MM-yyyy")" disabled="disabled">
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="form-group">
+                    <label><strong>End Date</strong><span class="mantSpan"> *</span></label>
+                    <div class="input-group date">
+                        <span class="input-group-text"><i class="bi bi-calendar" style="height:auto"></i></span>
+                        <input type="text" id="Item1_FY_END_DATE" name="Item1.FY_END_DATE" class="form-control" value="@Model.Item1.FY_END_DATE.ToString("dd-MM-yyyy")" d disabled="disabled">
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="form-group">
+                    <label><strong>Status</strong><span class="mantSpan"> *</span></label>
+                    @Html.DropDownListFor(m => m.Item1.FY_STATUS, new SelectList(HRMS.Models.DropDownList.GetValues("FYP"), "id", "text"), new { @class = "form-control select2", @data_placeholder = "Select Status", @style = "width:100%" })
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <table class="table table-bordered table-hover" id="custom-datatable">
+                    <thead>
+                        <tr>
+                            <th style="width:12%">Period</th>
+                            <th style="width:22%">Start Date</th>
+                            <th style="width:22%">End Date</th>
+                            <th style="width:17%">No. of Days</th>
+                            <th style="width:27%">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.Item2.Count(); i++)
+                        {
+                            <tr>
+                                <td style="width:12%">
+                                    @Model.Item2[i].FP_PERIOD
+                                    @Html.HiddenFor(h => h.Item2[i].FP_PERIOD)
+                                </td>
+                                @if (Model.Item2[i].FP_START_DATE != null)
+                                {
+                                    <td style="width:22%">@Model.Item2[i].FP_START_DATE.ToString("dd-MM-yyyy")</td>
+                                }
+                                else
+                                {
+                                    <td style="width:22%"></td>
+                                }
+                                @if (Model.Item2[i].FP_END_DATE != null)
+                                {
+                                    <td style="width:22%">@Model.Item2[i].FP_END_DATE.ToString("dd-MM-yyyy")</td>
+                                }
+                                else
+                                {
+                                    <td style="width:22%"></td>
+                                }
+                                <td style="width:17%">@Model.Item2[i].FP_NO_OF_DAYS</td>
+                                <td style="width:27%">
+                                    @Html.DropDownListFor(m => m.Item2[i].FP_STATUS, new SelectList(HRMS.Models.DropDownList.GetValues("FYP"), "id", "text", Model.Item2[i].FP_STATUS), new { @class = "form-control select2-child", @data_placeholder = "Select Status", @style = "width:100%" })
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    }
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-primary btnUpdate">Update</button>
+    <a href="~/FinancialYearPeriod/Index" class="btn btn-light-secondary">Close</a>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $(".select2").select2({
+            allowClear: true,
+            dropdownParent: $('#finYearPeriodModalLabel')
+        });
+
+        var dataTable = new simpleDatatables.DataTable("#custom-datatable", {
+            searchable: false,
+            perPageSelect: false,
+            pagination: { enabled: false },
+            labels: {
+                perPage: "",
+                info: ""
+            },
+            perPage: 12
+        });
+
+        $(".select2-child").select2({
+            allowClear: true,
+            dropdownParent: $('#finYearPeriodModalLabel')
+        });
+
+        $("#frmFinYearPeriod").validate({
+            rules: {
+                'Item1.FY_STATUS': {
+                    required: true
+                }
+            },
+            messages: {
+                'Item1.FY_STATUS': {
+                    required: 'Status must be selected'
+                }
+            },
+            errorPlacement: function (label, element) {
+                label.addClass('mt-2 text-danger');
+                label.insertAfter(element);
+            },
+            highlight: function (element, errorClass) {
+                $(element).parent().addClass('has-danger')
+                $(element).addClass('form-control-danger')
+            }, errorPlacement: function (label, element) {
+                if (element.parent('.input-group').length) {
+                    label.insertAfter(element.parent());
+                    label.addClass('mt-2 text-danger');
+                    // radio/checkbox?
+                } else if (element.hasClass('select2')) {
+                    label.insertAfter(element.next('span'));
+                    label.addClass('mt-2 text-danger');
+                    // select2
+                } else {
+                    label.insertAfter(element);
+                    label.addClass('mt-2 text-danger');
+                    // default
+                }
+            }
+        });
+
+        $("#Item1_FY_STATUS").on("change", function () {
+            CheckStatus();
+        });
+
+        function CheckStatus() {
+            var status = $("#Item1_FY_STATUS").val();
+            if (status == "U") {
+                var params = { "status": status };
+                $.getJSON("/FinancialYearPeriod/CheckStatus", params,
+                    function (result) {
+                        if (result == true) {
+                            swal({
+                                title: "Alert",
+                                text: '<span style="color:black">' + "Please close the previous financial year." + '</span>',
+                                type: "warning",
+                                html: true
+                            });
+
+                            $("#Item1_FY_STATUS").val("").trigger("change");
+                        }
+                    });
+            }
+        }
+
+        $('.btnUpdate').on('click', function () {
+            $.ajaxSetup({
+                async: false
+            });
+
+            if ($("#frmFinYearPeriod").valid()) {
+                var error = $('.error').text();
+                if (error == "") {
+                    $("#frmFinYearPeriod").submit();
+                }
+            }
+        });
+    });
+</script>

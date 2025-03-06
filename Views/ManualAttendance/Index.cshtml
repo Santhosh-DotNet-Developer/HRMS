@@ -1,0 +1,82 @@
+﻿@model List<HRMS.Models.MANUAL_ATTENDANCE>
+@{
+    ViewBag.Title = "Manual Attendance";
+    ViewBag.Parent = "Attendance";
+}
+
+<div id="main-content">
+    <div class="page-heading">
+        <div class="page-title">
+            <div class="row">
+                <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="~/Home/Index">Home</a></li>
+                        <li class="breadcrumb-item">@ViewBag.Parent</li>
+                        <li class="breadcrumb-item active">@ViewBag.Title</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <section class="section">
+            <div class="card">
+                <div class="card-header">
+                    <a href="~/ManualAttendance/AddEdit?manualAttdId=0" data-bs-toggle="modal" data-bs-target="#manualAttdModalPopUp" class="btn btn-primary float-end">Add Attendance</a>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover" id="datatable">
+                                <thead>
+                                    <tr>
+                                        <th style="width:10%">S. No.</th>
+                                        <th style="width:20%">Date</th>
+                                        <th style="width:20%">Employee</th>
+                                        <th style="width:20%">In Time</th>
+                                        <th style="width:20%">Out Time</th>
+                                        <th style="width:10%">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{int i = 0;}
+                                    @foreach (var manualAttd in Model)
+                                    {
+                                        <tr>
+                                            <td style="width:10%">@(i = i + 1)</td>
+                                            @if (manualAttd.MA_DATE != null)
+                                            {
+                                                <td style="width:20%">@manualAttd.MA_DATE.Value.ToString("dd-MM-yyyy")</td>
+                                            }
+                                            else
+                                            {
+                                                <td></td>
+                                            }
+                                            <td style="width:20%">@HRMS.Models.DropDownList.GetEmployeeCodeName(manualAttd.MA_EMP_CODE)</td>
+                                            <td style="width:20%">@manualAttd.MA_IN_TIME</td>
+                                            <td style="width:20%">@manualAttd.MA_OUT_TIME</td>
+                                            <td style="width:10%" class="text-center">
+                                                <a href="~/ManualAttendance/AddEdit?manualAttdId=@manualAttd.MA_ID" data-bs-toggle="modal" data-bs-target="#manualAttdModalPopUp" class="edit"><i class="bi bi-pencil-square"></i></a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<div class="modal fade" id="manualAttdModalPopUp" tabindex="-1" aria-labelledby="manualAttdModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#loading").hide();
+    });
+</script>

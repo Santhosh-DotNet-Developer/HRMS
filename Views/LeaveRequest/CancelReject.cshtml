@@ -1,0 +1,108 @@
+﻿@model HRMS.Models.LEAVE_REQUEST
+@{
+    Layout = null;
+    string type = ViewBag.Type;
+    if(type == "Cancel")
+    {
+        ViewBag.Title = "Cancel Leave Request";
+    }
+    else
+    {
+        ViewBag.Title = "Reject Leave Request";
+    }
+}
+
+<div class="modal-header" id="cancelModalLabel">
+    <h4 class="modal-title">@ViewBag.Title</h4>
+    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><i class="bi bi-x"></i></button>
+</div>
+<div class="modal-body">
+    @using (Html.BeginForm("Cancel", "LeaveRequest", FormMethod.Post, new { @id = "frmCancelLevReq" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(h => h.LR_ID)
+        @Html.Hidden("type", new { @class = "type" })
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    @if(type == "Cancel")
+                    {
+                        <label class="form-control-label"><strong>Cancel Reason</strong><span class="mantSpan"> *</span></label>
+                    @Html.TextAreaFor(m => m.LR_REJ_REASON, new { @class = "form-control", @placeholder = "Enter Cancel Reason", @autocomplete = "off", @maxlength = 100, @onkeypress = "return /[A-Za-z ]/.test(event.key)" })
+                    }
+                    else
+                    {
+                        <label class="form-control-label"><strong>Reject Reason</strong><span class="mantSpan"> *</span></label>
+                        @Html.TextAreaFor(m => m.LR_REJ_REASON, new { @class = "form-control", @placeholder = "Enter Reject Reason", @autocomplete = "off", @maxlength = 100, @onkeypress = "return /[A-Za-z ]/.test(event.key)" })
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<div class="modal-footer">
+    @if(type == "Cancel")
+    {
+        <button type="button" class="btn btn-primary btnCancel">Cancel</button>
+    }
+    else
+    {
+        <button type="button" class="btn btn-primary btnCancel">Reject</button>
+    }
+    <button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">Close</button>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $(".type").val('@type');
+        $("#frmCancelLevReq").validate({
+            rules: {
+                'LR_REJ_REASON': {
+                    required: true
+                }
+            },
+            messages: {
+                'LR_REJ_REASON': {
+                    required: function () {
+                        if ('@type' == "Cancel") {
+                            return 'Cancel Reason must be entered';
+                        } else {
+                            return 'Reject Reason must be entered';
+                        }
+                    }
+                }
+            },
+            errorPlacement: function (label, element) {
+                label.addClass('mt-2 text-danger');
+                label.insertAfter(element);
+            },
+            highlight: function (element, errorClass) {
+                $(element).parent().addClass('has-danger')
+                $(element).addClass('form-control-danger')
+            }, errorPlacement: function (label, element) {
+                if (element.parent('.input-group').length) {
+                    label.insertAfter(element.parent());
+                    label.addClass('mt-2 text-danger');
+                    // radio/checkbox?
+                } else if (element.hasClass('select2')) {
+                    label.insertAfter(element.next('span'));
+                    label.addClass('mt-2 text-danger');
+                    // select2
+                } else {
+                    label.insertAfter(element);
+                    label.addClass('mt-2 text-danger');
+                    // default
+                }
+            }
+        });
+
+        $('.btnCancel').on('click', function () {
+            if ($("#frmCancelLevReq").valid()) {
+                var error = $('.error').text();
+                if (error == "") {
+                    $("#frmCancelLevReq").submit();
+                }
+            }
+        });
+    });
+</script>

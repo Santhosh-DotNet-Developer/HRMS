@@ -1,0 +1,181 @@
+﻿@model HRMS.Models.LEAVE
+@{
+    Layout = null;
+    if (Model.LEV_CRE_BY == null)
+    {
+        ViewBag.Title = "Leave - Add New";
+    }
+    else
+    {
+        ViewBag.Title = "Leave - Edit";
+    }
+}
+
+<div class="modal-header">
+    <h5 class="modal-title" id="leaveModalLabel">@ViewBag.Title</h5>
+    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><i class="bi bi-x"></i></button>
+</div>
+<div class="modal-body">
+    @using (Html.BeginForm("Save", "Leave", FormMethod.Post, new { @id = "frmLeave" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(h => h.LEV_CRE_BY)
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="form-control-label"><strong>Leave Code</strong><span class="mantSpan"> *</span></label>
+                    @if (Model.LEV_CRE_BY == null)
+                    {
+                        @Html.TextBoxFor(m => m.LEV_CODE, new { @class = "form-control", @maxlength = "10", @placeholder = "Enter Leave Code", @autocomplete = "off", @onkeypress = "return /[A-Za-z ]/.test(event.key)" })
+                    }
+                    else
+                    {
+                        @Html.TextBoxFor(m => m.LEV_CODE, new { @class = "form-control", @disabled = "disabled" })
+                        @Html.HiddenFor(h => h.LEV_CODE)
+                    }
+                    <label id="LEV_CODE_Error" class="error text-danger mt-2" for="LEV_CODE" style="display:none"></label>
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="form-control-label"><strong>Leave Name</strong><span class="mantSpan"> *</span></label>
+                    @Html.TextBoxFor(m => m.LEV_NAME, new { @class = "form-control", @maxlength = "30", @placeholder = "Enter Leave Name", @autocomplete = "off", @onkeypress = "return /[A-Za-z ]/.test(event.key)" })
+                    <label id="LEV_NAME_Error" class="error text-danger mt-2" for="LEV_NAME" style="display:none"></label>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<div class="modal-footer">
+    @if(Model.LEV_CRE_BY == null)
+    {
+        <button type="button" class="btn btn-primary btnSave">Save</button>
+    }
+    else
+    {
+        <button type="button" class="btn btn-primary btnSave">Update</button>
+    }
+    <button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">Close</button>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#frmLeave").validate({
+            rules: {
+                'LEV_CODE': {
+                    required: true
+                },
+                'LEV_NAME': {
+                    required: true
+                }
+            },
+            messages: {
+                'LEV_CODE': {
+                    required: 'Leave Code must be entered'
+                },
+                'LEV_NAME': {
+                    required: 'Leave Name must be entered'
+                }
+            },
+            errorPlacement: function (label, element) {
+                label.addClass('mt-2 text-danger');
+                label.insertAfter(element);
+            },
+            highlight: function (element, errorClass) {
+                $(element).parent().addClass('has-danger')
+                $(element).addClass('form-control-danger')
+            }, errorPlacement: function (label, element) {
+                if (element.parent('.input-group').length) {
+                    label.insertAfter(element.parent());
+                    label.addClass('mt-2 text-danger');
+                    // radio/checkbox?
+                } else if (element.hasClass('select2')) {
+                    label.insertAfter(element.next('span'));
+                    label.addClass('mt-2 text-danger');
+                    // select2
+                } else {
+                    label.insertAfter(element);
+                    label.addClass('mt-2 text-danger');
+                    // default
+                }
+            }
+        });
+
+        $("#LEV_CODE").blur(function () {
+            CheckCodeExists();
+        });
+
+        function CheckCodeExists() {
+            if ('@Model.LEV_CRE_BY' == '') {
+                var inLeaveCode = $("#LEV_CODE").val();
+                var inLeaveCodeTrim = inLeaveCode.trim();
+                var inLeaveCodeLength = inLeaveCode.length;
+                if (inLeaveCodeLength > 0 && inLeaveCodeTrim == "") {
+                    $("#LEV_CODE_Error").css('display', 'block').text('Leave Code must be entered');
+                    $("#LEV_CODE").val(inLeaveCodeTrim);
+                }
+                else {
+                    if (inLeaveCodeTrim != "") {
+                        var parm = { "inLeaveCode": inLeaveCodeTrim };
+                        $.getJSON("/Leave/CheckCodeExists", parm,
+                            function (data) {
+                                if (data == true) {
+                                    $("#LEV_CODE_Error").css('display', 'block').text('Leave Code Already Exists');
+                                    $("#LEV_CODE").val(inLeaveCodeTrim);
+                                }
+                                else {
+                                    $("#LEV_CODE_Error").css('display', 'none').text('');
+                                }
+                            });
+                    }
+                }
+            }
+        }
+
+        $("#LEV_NAME").blur(function () {
+            CheckLeaveExists();
+        });
+
+        function CheckLeaveExists() {
+            var inLeave = $("#LEV_NAME").val();
+            var inLeaveTrim = inLeave.trim();
+            var inLeaveLength = inLeave.length;
+            if (inLeaveLength > 0 && inLeaveTrim == "") {
+                $("#LEV_NAME_Error").css('display', 'block').text('Leave Name must be entered');
+                $("#LEV_NAME").val(inLeaveTrim);
+            }
+            else {
+                if (inLeaveTrim != "") {
+                    var inLeaveCode = '@Model.LEV_CODE';
+                    var inCreBy = '@Model.LEV_CRE_BY';
+                    var parm = { "inLeave": inLeaveTrim, "inLeaveCode": inLeaveCode, "inCreBy": inCreBy };
+                    $.getJSON("/Leave/CheckLeaveExists", parm,
+                        function (data) {
+                            if (data == true) {
+                                $("#LEV_NAME_Error").css('display', 'block').text('Leave Name Already Exists');
+                                $("#LEV_NAME").val(inLeaveTrim);
+                            }
+                            else {
+                                $("#LEV_NAME_Error").css('display', 'none').text('');
+                            }
+                        });
+                }
+            }
+        }
+
+        $('.btnSave').on('click', function () {
+            $.ajaxSetup({
+                async: false
+            });
+
+            if ($("#frmLeave").valid()) {
+                CheckCodeExists();
+                CheckLeaveExists();
+                var error = $('.error').text();
+                if (error == "") {
+                    $("#frmLeave").submit();
+                }
+            }
+        });
+    });
+</script>

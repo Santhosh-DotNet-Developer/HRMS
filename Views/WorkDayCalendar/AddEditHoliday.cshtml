@@ -1,0 +1,185 @@
+﻿@model HRMS.Models.WORK_DAY_CALENDAR_HOLIDAYS
+@{
+    Layout = null;
+    Int16 BE = Convert.ToInt16(HttpContext.Current.Request.Cookies["BE"].Value);
+    Int16 BU = Convert.ToInt16(HttpContext.Current.Request.Cookies["BU"].Value);
+    HRMS.Models.HRMSEntities db = new HRMS.Models.HRMSEntities();
+    var hdData = db.WORK_DAY_CALENDAR_HD.Where(w => w.WDCH_BE == BE && w.WDCH_BU == BU && w.WDCH_DOC_NO == Model.WDCHO_DOC_NO).SingleOrDefault();
+    if (Model.WDCHO_SEQ_NO == 0)
+    {
+        ViewBag.Title = "Holiday - Add New";
+    }
+    else if (hdData.WDCH_STATUS == "A")
+    {
+        ViewBag.Title = "Holiday - View";
+    }
+    else
+    {
+        ViewBag.Title = "Holiday - Edit";
+    }
+    var startDate = "01" + "-" + "Jan" + "-" + hdData.WDCH_YEAR;
+    var endDate = "31" + "-" + "Dec" + "-" + hdData.WDCH_YEAR;
+}
+
+<div class="modal-header">
+    <h5 class="modal-title" id="holidayModalLabel">@ViewBag.Title</h5>
+    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><i class="bi bi-x"></i></button>
+</div>
+<div class="modal-body">
+    @using (Html.BeginForm("SaveHoliday", "WorkDayCalendar", FormMethod.Post, new { @id = "frmHoliday" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => Model.WDCHO_DOC_NO)
+        @Html.HiddenFor(m => Model.WDCHO_SEQ_NO)
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="form-control-label"><strong>Date<span class="mantSpan"> *</span></strong></label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-calendar" style="height:auto"></i></span>
+                        @if (Model.WDCHO_HOLIDAY == null)
+                        {
+                            @Html.TextBoxFor(m => m.WDCHO_HOLIDAY, new { @class = "form-control date", @placeholder = "Select Date", @autocomplete = "Off", @readonly = "readonly" })
+                        }
+                        else
+                        {
+                            <input type="text" id="WDCHO_HOLIDAY" name="WDCHO_HOLIDAY" class="form-control date" value="@Model.WDCHO_HOLIDAY.Value.ToString("dd-MM-yyyy")" disabled="disabled">
+                            @Html.HiddenFor(h=>h.WDCHO_HOLIDAY)
+                        }
+                    </div>
+                    <label id="WDCHO_HOLIDAY_Error" class="error text-danger mt-2" for="WDCHO_HOLIDAY" style="display:none"></label>
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label><strong>Reason</strong><span class="mantSpan"> *</span></label>
+                    @if (hdData.WDCH_STATUS != "A")
+                    {
+                        @Html.TextBoxFor(m => m.WDCHO_REF, new { @class = "form-control", @maxlength = "200", @placeholder = "Enter Reason", @autocomplete = "off", @onkeypress = "return /[A-Za-z ]/.test(event.key)" })
+                    }
+                    else
+                    {
+                        @Html.TextBoxFor(m => m.WDCHO_REF, new { @class = "form-control", @placeholder = "Enter Reason", @disabled = "disabled" })
+                    }
+                    <label id="WDCHO_REF_Error" class="error text-danger mt-2" for="WDCHO_REF" style="display:none"></label>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<div class="modal-footer">
+    @if (hdData.WDCH_STATUS != "A")
+    {
+        if(Model.WDCHO_SEQ_NO > 0)
+        {
+            <button type="button" class="btn btn-primary btnSave">Update</button>
+        }
+        else
+        {
+            <button type="button" class="btn btn-primary btnSave">Save</button>
+        }
+    }
+    <button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">Close</button>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('.date').datepicker({
+            autoclose: true,
+            keyboardNavigation: false,
+            format: "dd-M-yyyy",
+            todayBtn: "linked",
+            forceParse: false,
+            todayHighlight: true,
+            startDate: '@startDate',
+            endDate: '@endDate'
+        });
+
+        $("#frmHoliday").validate({
+            rules: {
+                'WDCHO_HOLIDAY': {
+                    required: true
+                },
+                'WDCHO_REF': {
+                    required: true
+                }
+            },
+            messages: {
+                'WDCHO_HOLIDAY': {
+                    required: 'Date must be selected'
+                },
+                'WDCHO_REF': {
+                    required: 'Reason must be entered'
+                }
+            },
+            highlight: function (element, errorClass) {
+                $(element).parent().addClass('has-danger')
+                $(element).addClass('form-control-danger')
+            },
+            errorPlacement: function (label, element) {
+                if (element.parent('.input-group').length) {
+                    label.insertAfter(element.parent());
+                    label.addClass('mt-2 text-danger');
+                }
+                else if (element.hasClass('select2')) {
+                    label.insertAfter(element.next('span'));
+                    label.addClass('mt-2 text-danger');
+                }
+                else {
+                    label.insertAfter(element);
+                    label.addClass('mt-2 text-danger');
+                }
+            }
+        });
+
+        $("#WDCHO_REF").on("blur", function () {
+            var inReason = $("#WDCHO_REF").val();
+            var inReasonTrim = inReason.trim();
+            var inReasonLength = inReason.length;
+            if (inReasonLength > 0 && inReasonTrim == "") {
+                $("#WDCHO_REF_Error").css("display", "block").text("Reason must be entered");
+                $("#WDCHO_REF").val(inReasonTrim);
+            }
+            else {
+                if (inReasonTrim != "") {
+                    $("#WDCHO_REF_Error").css("display", "none").text("");
+                    $("#WDCHO_REF").val(inReasonTrim);
+                }
+            }
+        });
+
+        $("#WDCHO_HOLIDAY").on("change", function () {
+            CheckHolidayExists();
+        });
+
+        function CheckHolidayExists() {
+            var date = $("#WDCHO_HOLIDAY").val();
+            if (date != "") {
+                var params = { "docNo": '@Model.WDCHO_DOC_NO', "date": date };
+                $.getJSON("/WorkDayCalendar/CheckHolidayExists", params,
+                    function (result) {
+                        if (result) {
+                            $("#WDCHO_HOLIDAY_Error").css("display", "block").text("Holiday already exist for the selected date");
+                        }
+                        else {
+                            $("#WDCHO_HOLIDAY_Error").css("display", "none").text("");
+                        }
+                    });
+            }
+        }
+
+        $(".btnSave").on("click", function () {
+            $.ajaxSetup({
+                async: false
+            });
+
+            if ($("#frmHoliday").valid()) {
+                CheckHolidayExists();
+                var error = $(".error").text();
+                if (error == "") {
+                    $("#frmHoliday").submit();
+                }
+            }
+        });
+    });
+</script>

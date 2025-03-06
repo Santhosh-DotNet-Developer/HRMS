@@ -1,0 +1,581 @@
+﻿@model HRMS.Repository.RepoWorkDayCalendar
+@{
+    if (Model.hdSingle.WDCH_DOC_NO == 0)
+    {
+        ViewBag.Title = "Work Day Calender - Add New";
+    }
+    else
+    {
+        ViewBag.Title = "Work Day Calender - Edit";
+    }
+    ViewBag.Parent = "Configuration";
+    var curTab = ViewBag.CurTab;
+}
+
+<style>
+    .custom-switch {
+        height: 2em !important;
+        width: 3.5em !important;
+        border: 1px solid #e1e3ea !important;
+    }
+</style>
+
+<div id="main-content">
+    <div class="page-heading">
+        <div class="page-title">
+            <div class="row">
+                <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="~/Home/Index">Home</a></li>
+                        <li class="breadcrumb-item">@ViewBag.Parent</li>
+                        <li class="breadcrumb-item active">@ViewBag.Title</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <section class="section">
+            <div class="card">
+                <div class="card-header">
+                    <h5>@ViewBag.Title</h5>
+                </div>
+                <div class="card-body">
+                    @using (Html.BeginForm("SaveHeader", "WorkDayCalendar", FormMethod.Post, new { @id = "frmCalendar" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="form-control-label"><strong>Unit</strong><span class="mantSpan"> *</span></label>
+                                    @if (Model.hdSingle.WDCH_DOC_NO == 0)
+                                    {
+                                        @Html.DropDownListFor(m => Model.hdSingle.WDCH_BU, new SelectList(HRMS.Models.DropDownList.GetUnits(), "id", "text"), new { @class = "form-control select2", @data_placeholder = "Select Unit" })
+                                    }
+                                    else
+                                    {
+                                        @Html.DropDownListFor(m => Model.hdSingle.WDCH_BU, new SelectList(HRMS.Models.DropDownList.GetUnits(), "id", "text"), new { @class = "form-control select2", @disabled = "disabled" })
+                                    }
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="form-control-label"><strong>Year</strong><span class="mantSpan"> *</span></label>
+                                    @if (Model.hdSingle.WDCH_DOC_NO == 0)
+                                    {
+                                        @Html.DropDownListFor(m => Model.hdSingle.WDCH_YEAR, new SelectList(HRMS.Models.DropDownList.GetFinYear(), "id", "text"), new { @class = "form-control select2", @data_placeholder = "Select Year" })
+                                    }
+                                    else
+                                    {
+                                        @Html.DropDownListFor(m => Model.hdSingle.WDCH_YEAR, new SelectList(HRMS.Models.DropDownList.GetFinYear(), "id", "text"), new { @class = "form-control select2", @disabled = "disabled" })
+                                    }
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="form-control-label"><strong>Start Date</strong><span class="mantSpan"> *</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-calendar" style="height:auto"></i></span>
+                                        @if (Model.hdSingle.WDCH_START_DATE == null)
+                                        {
+                                            <input type="text" name="hdSingle.WDCH_START_DATE" id="hdSingle_WDCH_START_DATE" class="form-control" placeholder="Select Start Date" value="@Model.hdSingle.WDCH_START_DATE" readonly="readonly" disabled="disabled">
+                                        }
+                                        else
+                                        {
+                                            <input type="text" name="hdSingle.WDCH_START_DATE" id="hdSingle_WDCH_START_DATE" class="form-control" value="@Model.hdSingle.WDCH_START_DATE.Value.ToString("dd-MM-yyyy")" readonly="readonly" disabled="disabled">
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="form-control-label"><strong>End Date</strong><span class="mantSpan"> *</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-calendar" style="height:auto"></i></span>
+                                        @if (Model.hdSingle.WDCH_END_DATE == null)
+                                        {
+                                            <input type="text" name="hdSingle.WDCH_END_DATE" id="hdSingle_WDCH_END_DATE" class="form-control" autocomplete="off" placeholder="Select End Date" value="@Model.hdSingle.WDCH_END_DATE" readonly="readonly" disabled="disabled">
+                                        }
+                                        else
+                                        {
+                                            <input type="text" name="hdSingle.WDCH_END_DATE" id="hdSingle_WDCH_END_DATE" class="form-control" autocomplete="off" value="@Model.hdSingle.WDCH_END_DATE.Value.ToString("dd-MM-yyyy")" readonly="readonly" disabled="disabled">
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="float-end">
+                                    @if (Model.hdSingle.WDCH_DOC_NO == 0)
+                                    {
+                                        <button type="button" class="btn btn-primary btnSave">Save</button>
+                                    }
+                                    else if (Model.hdSingle.WDCH_STATUS == "A")
+                                    {
+                                        <a href="~/WorkDayCalendar/DeActivateCalendar?docNo=@Model.hdSingle.WDCH_DOC_NO" id="btnActivate" class="btn btn-danger">DeActivate</a>
+                                    }
+                                    else
+                                    {
+                                        if(Model.lnLst.Count() == 0)
+                                        {
+                                            <a href="~/WorkDayCalendar/GenerateCalendar?docNo=@Model.hdSingle.WDCH_DOC_NO" id="btnGenerate" class="btn btn-primary">Generate</a>
+                                        }
+                                        <a href="~/WorkDayCalendar/ActivateCalendar?docNo=@Model.hdSingle.WDCH_DOC_NO" class="btn btn-secondary btnActivate">Activate</a>
+                                    }
+                                    <a href="~/WorkDayCalendar/Index" class="btn btn-light-secondary">Close</a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    @if (Model.hdSingle.WDCH_DOC_NO > 0)
+                    {
+                        <div class="card mt-1">
+                            <div class="card-body">
+                                <div class="col-md-12">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                                                <li class="nav-item" role="presentation">
+                                                    <a class="nav-link active" id="calendar-tab" data-bs-toggle="tab" href="#calendar" role="tab" aria-controls="calendar" aria-selected="true">Calendar</a>
+                                                </li>
+                                                @if (Model.lnLst.Count() > 0)
+                                                {
+                                                    <li class="nav-item" role="presentation">
+                                                        <a class="nav-link" id="holiday-tab" data-bs-toggle="tab" href="#holiday" role="tab" aria-controls="holiday" aria-selected="false">Holiday</a>
+                                                    </li>
+                                                }
+                                            </ul>
+                                            <div class="tab-content" id="myTabContent">
+                                                <div class="tab-pane fade show active" id="calendar" role="tabpanel" aria-labelledby="calendar-tab">
+                                                    <div class="card mt-1">
+                                                        <div class="card-body">
+                                                            <div class="row">
+                                                                <div class="table-responsive">
+                                                                    <table class="table table-bordered table-hover" id="datatable">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th style="width:10%">S. No.</th>
+                                                                                <th style="width:15%">Date</th>
+                                                                                <th style="width:40%">Day</th>
+                                                                                <th style="width:35%">Reason</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            @{ int i = 0;}
+                                                                            @foreach (var lnData in Model.lnLst)
+                                                                            {
+                                                                                <tr>
+                                                                                    <td style="width:10%">@( i = i + 1)</td>
+                                                                                    @if (lnData.WDCL_DAY != null)
+                                                                                    {
+                                                                                        <td style="width:15%">@lnData.WDCL_DAY.Value.ToString("dd-MM-yyyy")</td>
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        <td style="width:15%"></td>
+                                                                                    }
+                                                                                    <td style="width:40%">@HRMS.Models.DropDownList.GetValueDescription(lnData.WDCL_DAY_TYPE,"WOT")</td>
+                                                                                    <td style="width:35%">@lnData.WDCL_REF</td>
+                                                                                </tr>
+                                                                            }
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="tab-pane fade" id="holiday" role="tabpanel" aria-labelledby="holiday-tab">
+                                                    <div class="card mt-1">
+                                                        <div class="card-body">
+                                                            @using (Html.BeginForm("UpdateWeekOff", "WorkDayCalendar", FormMethod.Post, new { @id = "frmWeekOff" }))
+                                                            {
+                                                                @Html.AntiForgeryToken()
+                                                                @Html.HiddenFor(h => h.hdSingle.WDCH_DOC_NO)
+                                                                if (Model.hdSingle.WDCH_STATUS == "N")
+                                                                {
+                                                                    <div class="row">
+                                                                        <div class="col-sm-2 form-group">
+                                                                            <label><strong>Sunday</strong></label>
+                                                                            <div class="form-check form-switch">
+                                                                                @Html.CheckBox("Sunday", new { @class = "form-control form-check-input custom-switch" })
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-sm-2 form-group">
+                                                                            <label><strong>Monday</strong></label>
+                                                                            <div class="form-check form-switch">
+                                                                                @Html.CheckBox("Monday", new { @class = "form-control form-check-input custom-switch" })
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-sm-2 form-group">
+                                                                            <label><strong>Tuesday</strong></label>
+                                                                            <div class="form-check form-switch">
+                                                                                @Html.CheckBox("Tuesday", new { @class = "form-control form-check-input custom-switch" })
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-sm-2 form-group">
+                                                                            <label><strong>Wednesday</strong></label>
+                                                                            <div class="form-check form-switch">
+                                                                                @Html.CheckBox("Wednesday", new { @class = "form-control form-check-input custom-switch" })
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-sm-2 form-group">
+                                                                            <label><strong>Thursday</strong></label>
+                                                                            <div class="form-check form-switch">
+                                                                                @Html.CheckBox("Thursday", new { @class = "form-control form-check-input custom-switch" })
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-sm-2 form-group">
+                                                                            <label><strong>Friday</strong></label>
+                                                                            <div class="form-check form-switch">
+                                                                                @Html.CheckBox("Friday", new { @class = "form-control form-check-input custom-switch" })
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <div class="row">
+                                                                        <div class="col-sm-2 form-group">
+                                                                            <label><strong>Sunday</strong></label>
+                                                                            <div class="form-check form-switch">
+                                                                                @Html.CheckBox("Sunday", new { @class = "form-control form-check-input custom-switch", @disabled = "disabled" })
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-sm-2 form-group">
+                                                                            <label><strong>Monday</strong></label>
+                                                                            <div class="form-check form-switch">
+                                                                                @Html.CheckBox("Monday", new { @class = "form-control form-check-input custom-switch", @disabled = "disabled" })
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-sm-2 form-group">
+                                                                            <label><strong>Tuesday</strong></label>
+                                                                            <div class="form-check form-switch">
+                                                                                @Html.CheckBox("Tuesday", new { @class = "form-control form-check-input custom-switch", @disabled = "disabled" })
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-sm-2 form-group">
+                                                                            <label><strong>Wednesday</strong></label>
+                                                                            <div class="form-check form-switch">
+                                                                                @Html.CheckBox("Wednesday", new { @class = "form-control form-check-input custom-switch", @disabled = "disabled" })
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-sm-2 form-group">
+                                                                            <label><strong>Thursday</strong></label>
+                                                                            <div class="form-check form-switch">
+                                                                                @Html.CheckBox("Thursday", new { @class = "form-control form-check-input custom-switch", @disabled = "disabled" })
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-sm-2 form-group">
+                                                                            <label><strong>Friday</strong></label>
+                                                                            <div class="form-check form-switch">
+                                                                                @Html.CheckBox("Friday", new { @class = "form-control form-check-input custom-switch", @disabled = "disabled" })
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                }
+                                                                <div class="row">
+                                                                    <div class="col-sm-2 form-group">
+                                                                        <label><strong>Saturday</strong></label>
+                                                                        <div class="form-check form-switch">
+                                                                            @if (Model.hdSingle.WDCH_STATUS == "N")
+                                                                            {
+                                                                                @Html.CheckBox("Saturday", new { @class = "form-control form-check-input custom-switch" })
+                                                                            }                                                                                          
+                                                                            else                                                                                       
+                                                                            {                                                                                          
+                                                                                @Html.CheckBox("Saturday", new { @class = "form-control form-check-input custom-switch", @disabled = "disabled" })
+                                                                            }
+                                                                        </div>
+                                                                    </div>
+                                                                    @if (Model.hdSingle.WDCH_STATUS == "N")
+                                                                    {
+                                                                        <div class="col-sm-10">
+                                                                            <div class="float-end mt-3">
+                                                                                <button type="button" class="btn btn-secondary" id="btnWeekOff">Update Work Off</button>
+                                                                                <a href="~/WorkDayCalendar/AddEditHoliday?docNo=@Model.hdSingle.WDCH_DOC_NO&seqNo=0" data-bs-toggle="modal" data-bs-target="#holidayModalPopUp" class="btn btn-primary">Add Holiday</a>
+                                                                            </div>
+                                                                        </div>
+                                                                    }
+                                                                </div>
+                                                                <hr />
+                                                                <div class="row">
+                                                                    <div class="table-responsive">
+                                                                        <table class="table table-bordered table-hover" id="datatable1">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th style="width:10%">S. No.</th>
+                                                                                    <th style="width:15%">Date</th>
+                                                                                    <th style="width:65%">Reason</th>
+                                                                                    <th style="width:10%">Action</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                @{ int j = 0;}
+                                                                                @foreach (var data in Model.holidayLst)
+                                                                                {
+                                                                                    <tr>
+                                                                                        <td style="width:10%">@( j = j + 1)</td>
+                                                                                        @if (data.WDCHO_HOLIDAY != null)
+                                                                                        {
+                                                                                            <td style="width:15%">@data.WDCHO_HOLIDAY.Value.ToString("dd-MM-yyyy")</td>
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                                                                                            <td style="width:15%"></td>
+                                                                                        }
+                                                                                        <td style="width:65%">@data.WDCHO_REF</td>
+                                                                                        @if (Model.hdSingle.WDCH_STATUS == "N")
+                                                                                        {
+                                                                                            <td class="text-center" style="width:10%">
+                                                                                                <a href="~/WorkDayCalendar/AddEditHoliday?docNo=@data.WDCHO_DOC_NO&seqNo=@data.WDCHO_SEQ_NO" title="Edit" class="edit" data-bs-toggle="modal" data-bs-target="#holidayModalPopUp"><i class="bi bi-pencil-square"></i></a>
+                                                                                                <a href="~/WorkDayCalendar/DeleteHoliday?DocNo=@data.WDCHO_DOC_NO&seqNo=@data.WDCHO_SEQ_NO" title="Delete" class="delete"><i class="bi bi-trash"></i></a>
+                                                                                            </td>
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                                                                                            <td class="text-center" style="width:10%">
+                                                                                                <a href="~/WorkDayCalendar/AddEditHoliday?docNo=@data.WDCHO_DOC_NO&seqNo=@data.WDCHO_SEQ_NO" title="View" class="edit" data-bs-toggle="modal" data-bs-target="#holidayModalPopUp"><i class="bi bi-eye"></i></a>
+                                                                                            </td>
+                                                                                        }
+                                                                                    </tr>
+                                                                                }
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<div class="modal fade" id="holidayModalPopUp" tabindex="-1" aria-labelledby="holidayModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#loading").hide();
+
+        $(".select2").select2({
+            allowClear: true
+        });
+
+        $('#hdSingle_WDCH_BU').on('select2:open', function () {
+            $('input.select2-search__field').attr('placeholder', 'Search Unit');
+        });
+
+        $('#hdSingle_WDCH_YEAR').on('select2:open', function () {
+            $('input.select2-search__field').attr('placeholder', 'Search Year');
+        });
+
+        if ('@curTab' == "Holiday") {
+            $('#holiday-tab').tab('show');
+        }
+        else {
+            $('#calendar-tab').tab('show');
+        }
+
+        $("#frmCalendar").validate({
+            ignore: 'input[type=hidden]',
+            rules: {
+                'hdSingle.WDCH_BU': {
+                    required: true
+                },
+                'hdSingle.WDCH_YEAR': {
+                    required: true
+                },
+                'hdSingle.WDCH_START_DATE': {
+                    required: true
+                },
+                'hdSingle.WDCH_END_DATE': {
+                    required: true
+                }
+            },
+            messages: {
+                'hdSingle.WDCH_BU': {
+                    required: 'Unit must be selected'
+                },
+                'hdSingle.WDCH_YEAR': {
+                    required: 'Year must be selected'
+                },
+                'hdSingle.WDCH_START_DATE': {
+                    required: 'Start Date must be selected'
+                },
+                'hdSingle.WDCH_END_DATE': {
+                    required: 'End Date must be selected'
+                }
+            },
+            highlight: function (element, errorClass) {
+                $(element).parent().addClass('has-danger')
+                $(element).addClass('form-control-danger')
+            },
+            errorPlacement: function (label, element) {
+                if (element.parent('.input-group').length) {
+                    label.insertAfter(element.parent());
+                    label.addClass('mt-2 text-danger');
+                    // radio/checkbox?
+                }
+                else if (element.hasClass('select2')) {
+                    label.insertAfter(element.next('span'));
+                    label.addClass('mt-2 text-danger');
+                    // select2
+                }
+                else {
+                    label.insertAfter(element);
+                    label.addClass('mt-2 text-danger');
+                    // default
+                }
+            }
+        });
+
+        $("#hdSingle_WDCH_YEAR").on("change", function () {
+            CheckExists();
+        });
+
+        $("#hdSingle_WDCH_BU").on("change", function () {
+            CheckExists();
+        });
+
+        $("#btnGenerate").on("click", function (e) {
+            e.preventDefault();
+            var link = this.href;
+            swal({
+                title: "Alert",
+                text: '<span style="color:black"><span> ' + "Do you want to generate a calendar?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonText: "btn-info",
+                cancelButtonText: "No",
+                confirmButtonText: "Yes",
+                closeOnConfirm: true,
+                closeOnCancel: true,
+                showLoaderOnConfirm: true,
+                html: true
+            },
+            function (result) {
+                if (result) {
+                    if (link != undefined) {
+                        window.location.href = link;
+                    }
+                }
+            });
+        });
+
+        $(".btnActivate").on("click", function (e) {
+            e.preventDefault();
+            var link = this.href;
+            $.getJSON("/WorkDayCalendar/CheckActiveCalendar",
+            function (result) {
+                if (result == true) {
+                    swal({
+                        title: "Alert",
+                        text: '<span style="color:black">' + "Please deactivate the previous calendar." + '</span>',
+                        type: "warning",
+                        html: true
+                    });
+                }
+                else {
+                    if (link != undefined) {
+                        window.location.href = link;
+                    }
+                }
+            });
+        });
+
+        $("#btnWeekOff").on("click", function (e) {
+            e.preventDefault();
+            if ($("#Sunday").is(":checked") || $("#Monday").is(":checked") || $("#Tuesday").is(":checked") || $("#Wednesday").is(":checked") || $("#Thursday").is(":checked") || $("#Friday").is(":checked") || $("#Saturday").is(":checked")) {
+                swal({
+                    title: "Alert",
+                    text: '<span style="color:black"><span> ' + "Do you want to update Week Off?",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "btn-info",
+                    cancelButtonText: "No",
+                    confirmButtonText: "Yes",
+                    closeOnConfirm: true,
+                    closeOnCancel: true,
+                    showLoaderOnConfirm: true,
+                    html: true
+                },
+                function (result) {
+                    if (result) {
+                        $("#frmWeekOff").submit();
+                    }
+                });
+            }
+            else {
+                swal({
+                    title: "Alert",
+                    text: '<span style="color:black"><span> ' + "Please click atleast one day for update weekoff",
+                    type: "warning",
+                    html: true
+                });
+            }
+
+        });
+
+        $(".btnSave").on("click", function () {
+            if ($("#frmCalendar").valid()) {
+                var error = $(".error").text();
+                if (error == "") {
+                    $("#hdSingle_WDCH_START_DATE").attr("disabled", false);
+                    $("#hdSingle_WDCH_END_DATE").attr("disabled", false);
+                    $("#frmCalendar").submit();
+                }
+            }
+        });
+    });
+
+    function CheckExists() {
+        var unit = $("#hdSingle_WDCH_BU").val();
+        var year = $("#hdSingle_WDCH_YEAR").val();
+        if (unit != "" && year != "") {
+            var params = { "unit": unit, "year": year };
+            $.getJSON("/WorkDayCalendar/CheckExists", params,
+                function (result) {
+                    if (result == true) {
+                        swal({
+                            title: "Alert",
+                            text: '<span style="color:black">' + "Workday calendar already generated for this unit and year" + '</span>',
+                            type: "warning",
+                            html: true
+                        });
+
+                        $("#hdSingle_WDCH_YEAR").val("").trigger("change");
+                        $("#hdSingle_WDCH_START_DATE").val("");
+                        $("#hdSingle_WDCH_END_DATE").val("");
+                    }
+                    else {
+                        $("#hdSingle_WDCH_START_DATE").val("01-Jan-" + year);
+                        $("#hdSingle_WDCH_END_DATE").val("31-Dec-" + year);
+                    }
+                });
+        }
+        else {
+            if (year != "") {
+                $("#hdSingle_WDCH_START_DATE").val("01-Jan-" + year);
+                $("#hdSingle_WDCH_END_DATE").val("31-Dec-" + year);
+            }
+            else {
+                $("#hdSingle_WDCH_START_DATE").val("");
+                $("#hdSingle_WDCH_END_DATE").val("");
+            }
+        }
+    }
+</script>

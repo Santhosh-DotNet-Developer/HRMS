@@ -1,0 +1,476 @@
+﻿@{
+    string inEmpName = HttpContext.Current.Request.Cookies[Constant.EmpName].Value;
+    string inRole = HttpContext.Current.Request.Cookies[Constant.Role].Value;
+    int inRoleID = Convert.ToInt32(HttpContext.Current.Request.Cookies[Constant.RoleID].Value);
+    HRMS.Models.HRMSEntities db = new HRMS.Models.HRMSEntities();
+    var subMenu = db.APPL_FORMS.Where(w => w.AF_STATUS == "A").Join(db.ROLE_ACCESS.Where(w => w.RA_ROLE_ID == inRoleID), t1 => t1.AF_FORM_ID, t2 => t2.RA_FORM_ID, (t1, t2) => new { t1, t2 }).ToList();
+    var applFormId = db.APPL_FORMS.Where(w => w.AF_STATUS == "A").Join(db.ROLE_ACCESS.Where(w => w.RA_ROLE_ID == inRoleID), t1 => t1.AF_FORM_ID, t2 => t2.RA_FORM_ID, (t1, t2) => new { t1, t2 }).Select(s => s.t1.AF_FORM_ID).ToList();
+    var parFormId = db.APPL_FORMS.Where(w => applFormId.Contains(w.AF_FORM_ID)).Select(s => s.AF_PAR_FORM_ID).Distinct().ToList();
+    var mainMenu = db.APPL_FORMS.AsEnumerable().Where(w => w.AF_URL == "#" && w.AF_STATUS == "A" && parFormId.Contains(w.AF_FORM_ID.ToString())).ToList();
+    var sessionTime = DateTime.Now.AddMinutes(Constant.SessionTime);
+    string inEmpCode = HttpContext.Current.Request.Cookies[Constant.EmpCode].Value;
+    var inEmpData = db.EMPLOYEES.Where(w => w.EMP_CODE == inEmpCode).SingleOrDefault();
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    <link rel="shortcut icon" href="../Content/images/logo/SkyfinchIcon.png" type="image/x-icon">
+    <!-- Bootstrap -->
+    <link href="~/Content/css/bootstrap.css" rel="stylesheet" />
+    <link href="~/Content/css/app.css" rel="stylesheet" />
+    <link href="~/Content/vendors/perfect-scrollbar/perfect-scrollbar.css" rel="stylesheet" />
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Sweetalert -->
+    <link href="~/Content/vendors/sweetalert/css/sweetalert.css" rel="stylesheet" />
+    <!-- Datatable -->
+    <link href="~/Content/vendors/simple-datatables/style.css" rel="stylesheet" />
+    <!-- Select2 -->
+    <link href="~/Content/vendors/select2/css/select2.min.css" rel="stylesheet" />
+    <!-- Icons -->
+    <link href="~/Content/vendors/bootstrap-icons/bootstrap-icons.css" rel="stylesheet" />
+    <!-- Datepicker -->
+    <link href="~/Content/vendors/datepicker/css/bootstrap-datepicker3.css" rel="stylesheet" />
+    <!-- TimePicker -->
+    <link href="~/Content/vendors/timepicker/css/jquery.timepicker.css" rel="stylesheet" />
+    <!-- jquery -->
+    <script src="~/Content/js/jquery-3.7.1.js"></script>
+    <script src="~/Content/js/jquery.validate.js"></script>
+    <style>
+        /*.page-body-wrapper {
+            min-height: calc(100vh - 63px);
+        }*/
+        .mantSpan {
+            color: #dc3545;
+        }
+
+        .top .btn-top {
+            display: none;
+            border-radius: 50px;
+            position: fixed;
+            bottom: 2rem;
+            right: 1.5rem;
+            z-index: 999999;
+            box-shadow: 0 1px 20px 1px #435ebe;
+        }
+
+        .btn-top:hover {
+            transform: translate(0px, -2px) scale(1);
+        }
+
+        /*.bi-hourglass-split::before {
+            line-height: 1.3;
+        }*/
+
+        .custom-icon::before {
+            line-height: 1.3;
+        }
+
+        .bi-trash {
+            color: #fa3434;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div id="sidebar" class="active">
+            <div class="sidebar-wrapper active">
+                <div class="sidebar-header">
+                    <div class="d-flex justify-content-between">
+                        @*<div class="logo">
+                                <img src="~/Content/images/logo/skyfinch-logo.png" />
+                            </div>*@
+                        <div class="toggler">
+                            <a href="#" class="sidebar-hide d-xl-none d-block"><i class="bi bi-x bi-middle"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidebar-menu">
+                    <ul class="menu">
+                        <li class="sidebar-item active ">
+                            <a href="~/Dashboard/Index" class='sidebar-link'>
+                                <i class="bi bi-grid-fill"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        @foreach (var item in mainMenu)
+                        {
+                            var subMenuList = subMenu.Where(w => w.t1.AF_PAR_FORM_ID == item.AF_FORM_ID.ToString()).ToList();
+                            <li class="sidebar-item has-sub">
+                                <a class="sidebar-link" href="#@item.AF_FORM_ID">
+                                    <i class="@item.AF_PROD_NAME"></i>&nbsp;&nbsp;@item.AF_FORM_NAME
+                                </a>
+                                <ul class="submenu" id="@item.AF_FORM_ID">
+                                    @foreach (var subItem in subMenuList)
+                                    {
+                                        <li class="submenu-item ">
+                                            <a href="@subItem.t1.AF_URL">@subItem.t1.AF_FORM_NAME</a>
+                                        </li>
+                                    }
+                                </ul>
+                            </li>
+                        }
+                    </ul>
+                </div>
+                <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
+            </div>
+        </div>
+        <div id="main" class='layout-navbar'>
+            <header>
+                <nav class="navbar navbar-expand navbar-light ">
+                    <div class="container-fluid">
+                        <a href="#" class="burger-btn d-block">
+                            <i class="bi bi-justify fs-3"></i>
+                        </a>
+                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                                aria-expanded="false" aria-label="Toggle navigation">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                            <div class="navbar-nav ms-auto mb-2 mb-lg-0">
+                                <h2>Roadmap IT Solutions Pvt Ltd.</h2>
+                            </div>
+                            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                                <li class="nav-item dropdown me-3">
+                                    <a class="nav-link active dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false"><i class='bi bi-bell bi-sub fs-4 text-gray-600'></i></a>
+                                </li>
+                            </ul>
+                            <div class="dropdown">
+                                <a href="#" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <div class="user-menu d-flex">
+                                        <div class="user-name text-end me-3">
+                                            <h6 class="mb-0 text-gray-600">@inEmpName</h6>
+                                            <p class="mb-0 text-sm text-gray-600">@inRole</p>
+                                        </div>
+                                        <div class="user-img d-flex align-items-center">
+                                            <div class="avatar avatar-md">
+                                                <img src="../../@inEmpData.EMP_IMAGE_URL" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+                                    <li>
+                                        <h6 class="dropdown-header">Hello, @inEmpName!</h6>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="~/Employee/AddEdit?empCode=@inEmpData.EMP_CODE"><i class="bi bi-info-circle me-2"></i> Profile </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="~/UserCreation/ChangePassword"><i class="bi bi-person me-2"></i> Change Password </a>
+                                    </li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="~/Account/LogOut" onclick="SessionReset()"><i class="bi bi-box-arrow-left me-2"></i> Logout </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+                <div class="container-fluid">
+                    <div class="float-end me-4">
+                        <p id="sessionExpiryMsg" style="color: #ff7976;font-weight:700"></p>
+                    </div>
+                </div>
+            </header>
+            @RenderBody()
+            <hr />
+            <footer>
+                <p class="px-4"> Copyright © 2024 <a href="https://roadmapit.com/" target="_blank">Roadmap It Solution</a>. All rights reserved.</p>
+            </footer>
+        </div>
+    </div>
+    <div class="top">
+        <button type="button" onclick="topFunction()" class="btn btn-primary btn-top"><i class="bi bi-chevron-double-up"></i></button>
+    </div>
+
+    <script src="~/Content/js/bootstrap.bundle.min.js"></script>
+    <!-- Sweetalert -->
+    <script src="~/Content/vendors/sweetalert/js/sweetalert.js"></script>
+    <!-- Datatable -->
+    <script src="~/Content/vendors/simple-datatables/simple-datatables.js"></script>
+    <!-- Select2 -->
+    <script src="~/Content/vendors/select2/js/select2.min.js"></script>
+    <!-- Datepicker -->
+    <script src="~/Content/vendors/datepicker/js/bootstrap-datepicker.js"></script>
+    <script src="~/Content/vendors/datepicker/js/bootstrap-datepicker.min.js"></script>
+    <!-- TimePicker -->
+    <script src="~/Content/vendors/timepicker/js/jquery.timepicker.js"></script>
+    <script src="~/Content/js/main.js"></script>
+</body>
+</html>
+
+<script>
+    var flag = sessionStorage.getItem('sessionFlag') === 'true';
+    if ('@sessionTime' != null && '@sessionTime' != "") {
+        var expiryTime = new Date("@sessionTime.ToString("yyyy-MM-ddTHH:mm:ss")");
+        var interval = setInterval(function () {
+            var currentTime = new Date();
+            var diff = expiryTime - currentTime;
+            var minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            if (diff <= 300000 && !flag) {
+                swal({
+                    title: "Alert",
+                    text: '<span style="color:black;">Your Session ends with : <span style="color:red;">' + minutes + ' Min ' + seconds + ' Sec</span></span>',
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Reset",
+                    closeOnConfirm: true,
+                    showLoaderOnConfirm: true,
+                    html: true
+                },
+                    function (result) {
+                        if (result) {
+                            sessionStorage.removeItem('sessionFlag');
+                            window.location.href = "/Account/Login?type=Reset";
+                        }
+                        else {
+                            flag = true;
+                            sessionStorage.setItem('sessionFlag', 'true');
+                        }
+                    });
+            }
+            else if (diff <= 0) {
+                clearInterval(interval);
+                document.getElementById("sessionExpiryMsg").innerHTML = "Session has been expired.";
+            } else {
+                document.getElementById("sessionExpiryMsg").innerHTML = "Session ends with : " + minutes + " Min " + seconds + " Sec" + '&nbsp;<i class="bi bi-hourglass-split custom-icon" style="color: #ff7976;"></i>';
+            }
+        }, 1000);
+    }
+
+    function SessionReset() {
+        sessionStorage.removeItem('sessionFlag');
+    }
+
+    $("[data-bs-toggle=modal]").click(function (e) {
+        e.preventDefault();
+        var targetModalId = $(this).attr('data-bs-target');
+        var targetUrl = $(this).attr("href");
+        $.getJSON("/Account/CheckSessionStatus",
+        function (result) {
+            if (result == true) {
+                window.location.href = "/Account/SessionOut";
+            }
+            else {
+                $(targetModalId + " .modal-content").load(targetUrl, function () {
+                    $(targetModalId).modal("show");
+                });
+            }
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var datatable = document.querySelector('#datatable');
+        if (datatable) {
+            var dt = new simpleDatatables.DataTable("#datatable", {
+                perPageSelect: [5, 10, 25, 100],
+                perPage: 10,
+            });
+
+            datatable.addEventListener('click', function (e) {
+                if (e.target.closest('a.delete')) {
+                    e.preventDefault();
+                    var link = e.target.closest('a.delete');
+                    swal({
+                        title: "Alert",
+                        text: '<span style="color:black"><span> ' + 'Are you sure you want to delete?',
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Yes, delete it.",
+                        cancelButtonText: "No cancel, please.",
+                        closeOnConfirm: true,
+                        closeOnCancel: true,
+                        showLoaderOnConfirm: true,
+                        html: true
+                    },
+                    function (result) {
+                        if (result) {
+                            if (link != undefined) {
+                                window.location.href = link.href;
+                            }
+                        }
+                    });
+                }
+                else if (e.target.closest('a.edit')) {
+                    e.preventDefault();
+                    var target = e.target.closest('a.edit');
+                    var targetModalId = target.getAttribute('data-bs-target');
+                    var targetUrl = target.getAttribute('href');
+
+                    $.getJSON("/Account/CheckSessionStatus",
+                    function (result) {
+                        if (result == true) {
+                            window.location.href = "/Account/SessionOut";
+                        }
+                        else {
+                            $(targetModalId + " .modal-content").load(targetUrl, function () {
+                                $(targetModalId).modal("show");
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        var datatable1 = document.querySelector('#datatable1');
+        if (datatable1) {
+            var dt1 = new simpleDatatables.DataTable("#datatable1", {
+                perPageSelect: [5, 10, 25, 100, -1],
+                perPage: 10,
+            });
+
+            datatable1.addEventListener('click', function (e) {
+                if (e.target.closest('a.delete')) {
+                    e.preventDefault();
+                    var link = e.target.closest('a.delete');
+                    swal({
+                        title: "Alert",
+                        text: '<span style="color:black"><span> ' + 'Are you sure you want to delete?',
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Yes, delete it.",
+                        cancelButtonText: "No cancel, please.",
+                        closeOnConfirm: true,
+                        closeOnCancel: true,
+                        showLoaderOnConfirm: true,
+                        html: true
+                    },
+                    function (result) {
+                        if (result) {
+                            if (link != undefined) {
+                                window.location.href = link.href;
+                            }
+                        }
+                    });
+                }
+                else if (e.target.closest('a.edit')) {
+                    e.preventDefault();
+                    var target = e.target.closest('a.edit');
+                    var targetModalId = target.getAttribute('data-bs-target');
+                    var targetUrl = target.getAttribute('href');
+
+                    $.getJSON("/Account/CheckSessionStatus",
+                    function (result) {
+                        if (result == true) {
+                            window.location.href = "/Account/SessionOut";
+                        }
+                        else {
+                            $(targetModalId + " .modal-content").load(targetUrl, function () {
+                                $(targetModalId).modal("show");
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        var datatable2 = document.querySelector('#datatable2');
+        if (datatable2) {
+            var dt2 = new simpleDatatables.DataTable("#datatable2", {
+                perPageSelect: [5, 10, 25, 100, -1],
+                perPage: 10,
+            });
+
+            datatable2.addEventListener('click', function (e) {
+                if (e.target.closest('a.delete')) {
+                    e.preventDefault();
+                    var link = e.target.closest('a.delete');
+                    swal({
+                        title: "Alert",
+                        text: '<span style="color:black"><span> ' + 'Are you sure you want to delete?',
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Yes, delete it.",
+                        cancelButtonText: "No cancel, please.",
+                        closeOnConfirm: true,
+                        closeOnCancel: true,
+                        showLoaderOnConfirm: true,
+                        html: true
+                    },
+                    function (result) {
+                        if (result) {
+                            if (link != undefined) {
+                                window.location.href = link.href;
+                            }
+                        }
+                    });
+                }
+                else if (e.target.closest('a.edit')) {
+                    e.preventDefault();
+                    var target = e.target.closest('a.edit');
+                    var targetModalId = target.getAttribute('data-bs-target');
+                    var targetUrl = target.getAttribute('href');
+
+                    $.getJSON("/Account/CheckSessionStatus",
+                    function (result) {
+                        if (result == true) {
+                            window.location.href = "/Account/SessionOut";
+                        }
+                        else {
+                            $(targetModalId + " .modal-content").load(targetUrl, function () {
+                                $(targetModalId).modal("show");
+                            });
+                        }
+                    });
+                }
+            });
+        }
+    });
+
+    var notificID = '@ViewBag.Show';
+    var notificMsg = '@ViewBag.Content';
+    (function ($) {
+        if (notificID != '') {
+            if (notificID == "Insert" || notificID == "Update" || notificID == "Delete" || notificID == "Cancel" || notificID == "Success" || notificID == "Submit" || notificID == "CustomS") {
+                swal({
+                    title: "Success",
+                    text: '<span style="color:black"><span>' + notificMsg + '',
+                    type: "success",
+                    html: true
+                });
+            }
+            else if (notificID == "Error") {
+                swal({
+                    title: "Exception",
+                    text: '<span style="color:black"><span> ' + notificMsg + '',
+                    type: "error",
+                    html: true
+                });
+            }
+            else if (notificID == "Child") {
+                swal({
+                    title: "Alert",
+                    text: '<span style="color:black"><span> ' + notificMsg + '',
+                    type: "warning",
+                    html: true
+                });
+            }
+        }
+    })(jQuery);
+
+    window.onscroll = function () {
+        scrollFunction()
+    };
+
+    function scrollFunction() {
+        if (document.body.scrollTop > 70 || document.documentElement.scrollTop > 70) {
+            $(".btn-top").css("display", "block");
+        } else {
+            $(".btn-top").css("display", "none");
+        }
+    }
+
+    function topFunction() {
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+    }
+</script>

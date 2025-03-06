@@ -1,0 +1,320 @@
+﻿@model HRMS.Models.LeaveRequestModel
+@{
+    ViewBag.Title = "Leave Request/History";
+    ViewBag.Parent = "Employee Self Service";
+    var curTab = ViewBag.CurTab;
+    string role = HttpContext.Current.Request.Cookies[Constant.Role].Value.ToLower();
+}
+
+<div id="main-content">
+    <div class="page-heading">
+        <div class="page-title">
+            <div class="row">
+                <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="~/Home/Index">Home</a></li>
+                        <li class="breadcrumb-item">@ViewBag.Parent</li>
+                        <li class="breadcrumb-item active">@ViewBag.Title</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <section class="section">
+            <div class="card">
+                <div class="card-body">
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link active" id="levReq-tab" data-bs-toggle="tab" href="#levReq" role="tab" aria-controls="levReq" aria-selected="true">Leave Request</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="levReqHist-tab" data-bs-toggle="tab" href="#levReqHist" role="tab" aria-controls="levReqHist" aria-selected="false">Leave Request History</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="myTabContent">
+                        <div class="tab-pane fade show active" id="levReq" role="tabpanel" aria-labelledby="levReq-tab">
+                            <div class="card">
+                                <div class="card-header">
+                                    <a href="~/LeaveRequest/AddEditLeaveRequest?inLevReqId=0" data-bs-toggle="modal" data-bs-target="#levReqModalPopUp" class="btn btn-primary float-end">Add Leave Request</a>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-hover" id="customDatatable">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width:10%">S. No.</th>
+                                                        <th style="width:15%">Employee</th>
+                                                        <th style="width:13%">Start Date</th>
+                                                        <th style="width:14%">No. of Days</th>
+                                                        <th style="width:13%">End Date</th>
+                                                        <th style="width:15%">Reason</th>
+                                                        <th style="width:10%">Status</th>
+                                                        <th style="width:10%">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @{int i = 0;}
+                                                    @foreach (var levReq in Model.LeaveRequest)
+                                                    {
+                                                        <tr>
+                                                            <td style="width:10%">@(i = i + 1)</td>
+                                                            <td style="width:15%">@HRMS.Models.DropDownList.GetEmployeeCodeName(levReq.LR_EMP_CODE)</td>
+                                                            @if (levReq.LR_START_DATE != null)
+                                                            {
+                                                                <td style="width:13%">@levReq.LR_START_DATE.Value.ToString("dd-MM-yyyy")</td>
+                                                            }
+                                                            else
+                                                            {
+                                                                <td style="width:13%"></td>
+                                                            }
+                                                            <td style="width:14%">@levReq.LR_NO_OF_DAYS</td>
+                                                            @if (levReq.LR_END_DATE != null)
+                                                            {
+                                                                <td style="width:13%">@levReq.LR_END_DATE.Value.ToString("dd-MM-yyyy")</td>
+                                                            }
+                                                            else
+                                                            {
+                                                                <td style="width:13%"></td>
+                                                            }
+                                                            <td style="width:15%">@levReq.LR_REASON</td>
+                                                            <td style="width:10%" class="text-center">
+                                                                @if (levReq.LR_STATUS == "N")
+                                                                {
+                                                                    <span class="badge bg-primary">New</span>
+                                                                }
+                                                            </td>
+                                                            <td style="width:10%" class="text-center">
+                                                                @if (role == "manager" || role == "hr manager")
+                                                                {
+                                                                    <a href="~/LeaveRequest/Approve?inLevReqId=@levReq.LR_ID" title="Approve" class="approve" data-inlevreqid=@levReq.LR_ID><i class="bi bi-check-circle-fill"></i></a><span>&nbsp;&nbsp;</span>
+                                                                    <a href="#" title="Reject" class="reject" data-inlevreqid=@levReq.LR_ID><i class="bi bi-x-circle-fill" style="color: #fa3434;"></i></a>
+                                                                }
+                                                                else
+                                                                {
+                                                                    if (role == "admin" && levReq.LR_CRE_BY == "admin")
+                                                                    {
+                                                                        <a href="#" title="Cancel" class="cancel" data-inlevreqid=@levReq.LR_ID><i class="bi bi-x-square-fill" style="color: #fa3434;"></i></a>
+                                                                    }
+                                                                    else if (role != "admin")
+                                                                    {
+                                                                        <a href="#" title="Cancel" class="cancel" data-inlevreqid=@levReq.LR_ID><i class="bi bi-x-square-fill" style="color: #fa3434;"></i></a>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <span>-</span>
+                                                                    }
+                                                                }
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="levReqHist" role="tabpanel" aria-labelledby="levReqHist-tab">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-hover" id="datatable1">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width:10%">S. No.</th>
+                                                        <th style="width:15%">Employee</th>
+                                                        <th style="width:13%">Start Date</th>
+                                                        <th style="width:14%">No. of Days</th>
+                                                        <th style="width:13%">End Date</th>
+                                                        <th style="width:25%">Reason</th>
+                                                        <th style="width:10%">Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @{int j = 0;}
+                                                    @foreach (var levReqHist in Model.LeaveRequestHist)
+                                                    {
+                                                        <tr>
+                                                            <td style="width:10%">@(j = j + 1)</td>
+                                                            <td style="width:15%">@HRMS.Models.DropDownList.GetEmployeeCodeName(levReqHist.LR_EMP_CODE)</td>
+                                                            @if (levReqHist.LR_START_DATE != null)
+                                                            {
+                                                                <td style="width:13%">@levReqHist.LR_START_DATE.Value.ToString("dd-MM-yyyy")</td>
+                                                            }
+                                                            else
+                                                            {
+                                                                <td style="width:13%"></td>
+                                                            }
+                                                            <td style="width:14%">@levReqHist.LR_NO_OF_DAYS</td>
+                                                            @if (levReqHist.LR_END_DATE != null)
+                                                            {
+                                                                <td style="width:13%">@levReqHist.LR_END_DATE.Value.ToString("dd-MM-yyyy")</td>
+                                                            }
+                                                            else
+                                                            {
+                                                                <td style="width:13%"></td>
+                                                            }
+                                                            <td style="width:25%">@levReqHist.LR_REASON</td>
+                                                            <td style="width:10%" class="text-center">
+                                                                @if (levReqHist.LR_STATUS == "N")
+                                                                {
+                                                                    <span class="badge bg-primary">New</span>
+                                                                }
+                                                                else if (levReqHist.LR_STATUS == "C")
+                                                                {
+                                                                    <span class="badge bg-danger">Canceled</span>
+                                                                }
+                                                                else if (levReqHist.LR_STATUS == "A")
+                                                                {
+                                                                    <span class="badge bg-success">Approved</span>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="badge bg-danger">Rejected</span>
+                                                                }
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<div class="modal fade" id="levReqModalPopUp" tabindex="-1" aria-labelledby="levReqModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="cancelModalPopUp" tabindex="-1" role="dialog" aria-labelledby="cancelModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#loading").hide();
+
+        if ('@curTab' == "History") {
+            $('#levReqHist-tab').tab('show');
+        }
+        else {
+            $('#levReq-tab').tab('show');
+        }
+
+        var datatable = document.querySelector('#customDatatable');
+        if (datatable) {
+            var dt = new simpleDatatables.DataTable("#customDatatable", {
+                perPageSelect: [5, 10, 25, 100, -1],
+                perPage: 10,
+            });
+
+            datatable.addEventListener('click', function (e) {
+                if (e.target.closest('a.cancel')) {
+                    e.preventDefault();
+                    var link = e.target.closest('a.cancel');
+                    var inLevReqId = link.getAttribute('data-inLevReqId');
+                    swal({
+                        title: "Alert",
+                        text: '<span style="color:black"><span> ' + 'Are you sure you want to cancel?',
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Yes, cancel it.",
+                        cancelButtonText: "No cancel, please.",
+                        closeOnConfirm: true,
+                        closeOnCancel: true,
+                        showLoaderOnConfirm: true,
+                        html: true
+                    },
+                    function (result) {
+                        if (result) {
+                            $.ajax({
+                                url: '@Url.Action("CancelLeaveRequest", "LeaveRequest")',
+                                type: 'GET',
+                                data: { inLevReqId: inLevReqId, type: "Cancel" },
+                                success: function (data) {
+                                    $('#cancelModalPopUp .modal-content').html(data);
+                                    $('#cancelModalPopUp').modal('show');
+                                },
+                                error: function () {
+                                    alert('Failed to load content.');
+                                }
+                            });
+                        }
+                    });
+                }
+
+                if (e.target.closest('a.approve')) {
+                    e.preventDefault();
+                    var link = e.target.closest('a.approve');
+                    swal({
+                        title: "Alert",
+                        text: '<span style="color:black"><span> ' + 'Are you sure you want to approve?',
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Yes, approve it.",
+                        cancelButtonText: "No cancel, please.",
+                        closeOnConfirm: true,
+                        closeOnCancel: true,
+                        showLoaderOnConfirm: true,
+                        html: true
+                    },
+                    function (result) {
+                        if (result) {
+                            if (link != undefined) {
+                                window.location.href = link.href;
+                            }
+                        }
+                    });
+                }
+
+                if (e.target.closest('a.reject')) {
+                    e.preventDefault();
+                    var link = e.target.closest('a.reject');
+                    var inLevReqId = link.getAttribute('data-inLevReqId');
+                    swal({
+                        title: "Alert",
+                        text: '<span style="color:black"><span> ' + 'Are you sure you want to reject?',
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Yes, reject it.",
+                        cancelButtonText: "No cancel, please.",
+                        closeOnConfirm: true,
+                        closeOnCancel: true,
+                        showLoaderOnConfirm: true,
+                        html: true
+                    },
+                    function (result) {
+                        if (result) {
+                            $.ajax({
+                                url: '@Url.Action("CancelLeaveRequest", "LeaveRequest")',
+                                type: 'GET',
+                                data: { inLevReqId: inLevReqId, type: "Reject" },
+                                success: function (data) {
+                                    $('#cancelModalPopUp .modal-content').html(data);
+                                    $('#cancelModalPopUp').modal('show');
+                                },
+                                error: function () {
+                                    alert('Failed to load content.');
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+    });
+</script>

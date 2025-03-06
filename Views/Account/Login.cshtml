@@ -1,0 +1,130 @@
+﻿@model HRMS.Models.LoginViewModel
+@{
+    ViewBag.Title = "Login";
+    Layout = null;
+    string errorMsg = ViewBag.Error;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    <link rel="shortcut icon" href="../Content/images/logo/SkyfinchIcon.png" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="~/Content/css/bootstrap.css" rel="stylesheet" />
+    <link href="~/Content/vendors/bootstrap-icons/bootstrap-icons.css" rel="stylesheet" />
+    <link href="~/Content/css/app.css" rel="stylesheet" />
+    <link href="~/Content/css/pages/auth.css" rel="stylesheet" />
+</head>
+<body>
+    <section class="vh-100" style="background-color: #435ebe;">
+        <div class="container py-5 h-100">
+            <div class="row d-flex justify-content-center align-items-center h-100">
+                <div class="col-sm-10">
+                    <div class="card" style="border-radius: 1rem;">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="row">
+                                        <img src="~/Content/images/logo/18771.jpg" class="p-0" />
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 align-content-center p-0">
+                                    @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { id = "frmLogin" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <div class="row justify-content-center">
+                                            <div class="col-sm-8">
+                                                <div class="row">
+                                                    <img src="~/Content/images/logo/skyfinch-logo.png" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row justify-content-center mt-2">
+                                            <div class="col-sm-8">
+                                                <div class="form-group has-icon-right">
+                                                    <div class="position-relative">
+                                                        <div class="form-control-icon">
+                                                            <i class="bi bi-person"></i>
+                                                        </div>
+                                                        <input type="text" name="UserName" id="UserName" class="form-control" placeholder="Username">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group has-icon-right">
+                                                    <div class="position-relative">
+                                                        <div class="form-control-icon">
+                                                            <i class="bi bi-key"></i>
+                                                        </div>
+                                                        <input type="password" name="Password" id="Password" class="form-control" placeholder="Password">
+                                                    </div>
+                                                </div>
+                                                <label id="errorMsg" class="error text-danger" style="display:none"></label>
+                                            </div>
+                                        </div>
+                                        <div class="row justify-content-center">
+                                            <div class="col-6 col-lg-4">
+                                                <button type="button" class="btn btn-primary btn-block btnLogin mt-2">Log in</button>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>
+
+<script src="~/Content/js/jquery-3.7.1.js"></script>
+<script src="~/Content/js/jquery.validate.js"></script>
+<script>
+    $(document).ready(function () {
+        if ('@errorMsg' != "") {
+            $("#errorMsg").css('display', 'block').text('@errorMsg');
+        }
+        function CheckFormValidation() {
+            var username = $("#UserName").val();
+            var password = $("#Password").val();
+            var usernameTrim = username.trim();
+            var passwordTrim = password.trim();
+            if (usernameTrim == "" && passwordTrim == "") {
+                $("#errorMsg").css('display', 'block').text('Username/Password must be entered');
+                $("#UserName").val(usernameTrim);
+                $("#Password").val(passwordTrim);
+            }
+            else if (usernameTrim == "") {
+                $("#errorMsg").css('display', 'block').text('Username must be entered');
+                $("#UserName").val(usernameTrim == "");
+            }
+            else if (passwordTrim == "") {
+                $("#errorMsg").css('display', 'block').text('Password must be entered');
+                $("#Password").val(passwordTrim);
+            }
+            else {
+                $("#errorMsg").css('display', 'none').text("");
+            }
+        }
+
+        $('#UserName,#Password').on('input', function () {
+            $("#errorMsg").css('display', 'none').text("");
+        });
+
+        $('.btnLogin').on('click', function () {
+            $.ajaxSetup({
+                async: false
+            });
+
+            CheckFormValidation();
+            var error = $('.error').text();
+            if (error == "") {
+                $("#frmLogin").submit();
+            }
+        });
+    });
+</script>
+

@@ -1,0 +1,174 @@
+﻿@model HRMS.Models.SALARY_GROUP
+@{
+    Layout = null;
+    if (Model.SG_CRE_BY == null)
+    {
+        ViewBag.Title = "Salary Group - Add New";
+    }
+    else
+    {
+        ViewBag.Title = "Salary Group - Edit";
+    }
+}
+
+<div class="modal-header">
+    <h5 class="modal-title" id="salaryGrpModalLabel">@ViewBag.Title</h5>
+    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><i class="bi bi-x"></i></button>
+</div>
+<div class="modal-body">
+    @using (Html.BeginForm("SaveSalaryGroup", "EmployeeGradeSalaryGroup", FormMethod.Post, new { @id = "frmSalaryGrp" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(h => h.SG_CRE_BY)
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label><strong>Code</strong><span class="mantSpan"> *</span></label>
+                    @if (Model.SG_CRE_BY == null)
+                    {
+                        @Html.TextBoxFor(m => m.SG_CODE, new { @class = "form-control", @maxlength = "5", @placeholder = "Enter Code", @autocomplete = "off", @onkeypress = "return /[A-Za-z]/.test(event.key)" })
+                    }
+                    else
+                    {
+                        @Html.TextBoxFor(m => m.SG_CODE, new { @class = "form-control", @disabled = "disabled" })
+                        @Html.HiddenFor(h => h.SG_CODE)
+                    }
+                    <label id="SG_CODE_Error" class="error text-danger mt-2" for="SG_CODE" style="display:none"></label>
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label><strong>Salary Group</strong><span class="mantSpan"> *</span></label>
+                    @Html.TextBoxFor(m => m.SG_NAME, new { @class = "form-control", @maxlength = "30", @placeholder = "Enter Salary Group", @autocomplete = "off", @onkeypress = "return /[A-Za-z ]/.test(event.key)" })
+                    <label id="SG_NAME_Error" class="error text-danger mt-2" for="SG_NAME" style="display:none"></label>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-primary btnSave">Save</button>
+    <button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">Close</button>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#frmSalaryGrp").validate({
+            rules: {
+                'SG_CODE': {
+                    required: true
+                },
+                'SG_NAME': {
+                    required: true
+                }
+            },
+            messages: {
+                'SG_CODE': {
+                    required: 'Code must be entered'
+                },
+                'SG_NAME': {
+                    required: 'Salary Group must be entered'
+                }
+            },
+            errorPlacement: function (label, element) {
+                label.addClass('mt-2 text-danger');
+                label.insertAfter(element);
+            },
+            highlight: function (element, errorClass) {
+                $(element).parent().addClass('has-danger')
+                $(element).addClass('form-control-danger')
+            }, errorPlacement: function (label, element) {
+                if (element.parent('.input-group').length) {
+                    label.insertAfter(element.parent());
+                    label.addClass('mt-2 text-danger');
+                    // radio/checkbox?
+                } else if (element.hasClass('select2')) {
+                    label.insertAfter(element.next('span'));
+                    label.addClass('mt-2 text-danger');
+                    // select2
+                } else {
+                    label.insertAfter(element);
+                    label.addClass('mt-2 text-danger');
+                    // default
+                }
+            }
+        });
+
+        $("#SG_CODE").blur(function () {
+            CheckSalaryGroupCodeExists();
+        });
+
+        function CheckSalaryGroupCodeExists() {
+            if ('@Model.SG_CRE_BY' == '') {
+                var inSalaryGrpCode = $("#SG_CODE").val();
+                var inSalaryGrpCodeTrim = inSalaryGrpCode.trim();
+                var inSalaryGrpCodeLength = inSalaryGrpCode.length;
+                if (inSalaryGrpCodeLength > 0 && inSalaryGrpCodeTrim == "") {
+                    $("#SG_CODE_Error").css('display', 'block').text('Code must be entered');
+                    $("#SG_CODE").val(inSalaryGrpCodeTrim);
+                }
+                else {
+                    if (inSalaryGrpCodeTrim != "") {
+                        var parm = { "inSalaryGrpCode": inSalaryGrpCodeTrim };
+                        $.getJSON("/EmployeeGradeSalaryGroup/CheckSalaryGroupCodeExists", parm,
+                            function (data) {
+                                if (data == true) {
+                                    $("#SG_CODE_Error").css('display', 'block').text('Code Already Exists');
+                                    $("#SG_CODE").val(inSalaryGrpCodeTrim);
+                                }
+                                else {
+                                    $("#SG_CODE_Error").css('display', 'none').text('');
+                                }
+                            });
+                    }
+                }
+            }
+        }
+
+        $("#SG_NAME").blur(function () {
+            CheckSalaryGroupExists();
+        });
+
+        function CheckSalaryGroupExists() {
+            var inSalaryGroup = $("#SG_NAME").val();
+            var inSalaryGroupTrim = inSalaryGroup.trim();
+            var inSalaryGroupLength = inSalaryGroup.length;
+            if (inSalaryGroupLength > 0 && inSalaryGroupTrim == "") {
+                $("#SG_NAME_Error").css('display', 'block').text('Salary Group must be entered');
+                $("#SG_NAME").val(inSalaryGroupTrim);
+            }
+            else {
+                if (inSalaryGroupTrim != "") {
+                    var inSalaryGrpCode = '@Model.SG_CODE';
+                    var inCreBy = '@Model.SG_CRE_BY';
+                    var parm = { "inSalaryGroup": inSalaryGroupTrim, "inSalaryGrpCode": inSalaryGrpCode, "inCreBy": inCreBy };
+                    $.getJSON("/EmployeeGradeSalaryGroup/CheckSalaryGroupExists", parm,
+                        function (data) {
+                            if (data == true) {
+                                $("#SG_NAME_Error").css('display', 'block').text('Salary Group Already Exists');
+                                $("#SG_NAME").val(inSalaryGroupTrim);
+                            }
+                            else {
+                                $("#SG_NAME_Error").css('display', 'none').text('');
+                            }
+                        });
+                }
+            }
+        }
+
+        $('.btnSave').on('click', function () {
+            $.ajaxSetup({
+                async: false
+            });
+
+            if ($("#frmSalaryGrp").valid()) {
+                CheckSalaryGroupCodeExists();
+                CheckSalaryGroupExists();
+                var error = $('.error').text();
+                if (error == "") {
+                    $("#frmSalaryGrp").submit();
+                }
+            }
+        });
+    });
+</script>

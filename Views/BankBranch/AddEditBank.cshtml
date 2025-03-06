@@ -1,0 +1,163 @@
+﻿@model HRMS.Models.BANK
+@{
+    Layout = null;
+    string btnType = "";
+    if (Model.BANK_CRE_BY == null)
+    {
+        ViewBag.Title = "Bank - Add New";
+        btnType = "Save";
+    }
+    else
+    {
+        ViewBag.Title = "Bank - Edit";
+        btnType = "Update";
+    }
+}
+
+<div class="modal-header">
+    <h5 class="modal-title" id="bankModalLabel">@ViewBag.Title</h5>
+    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><i class="bi bi-x"></i></button>
+</div>
+<div class="modal-body">
+    @using (Html.BeginForm("SaveBank", "BankBranch", FormMethod.Post, new { @id = "frmBank" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(h => h.BANK_CRE_BY)
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label><strong>Bank Code</strong><span class="mantSpan"> *</span></label>
+                    @Html.TextBoxFor(m => m.BANK_CODE, new { @class = "form-control", @maxlength = "10", @placeholder = "Enter Bank Code", @autocomplete = "off", @onkeypress = "return /[A-Za-z]/.test(event.key)" })
+                    <label id="BANK_CODE_Error" class="error text-danger mt-2" for="BANK_CODE" style="display:none"></label>
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label><strong>Bank Name</strong><span class="mantSpan"> *</span></label>
+                    @Html.TextBoxFor(m => m.BANK_NAME, new { @class = "form-control", @maxlength = "30", @placeholder = "Enter Bank Name", @autocomplete = "off", @onkeypress = "return /[A-Za-z ]/.test(event.key)" })
+                    <label id="BANK_NAME_Error" class="error text-danger mt-2" for="BANK_NAME" style="display:none"></label>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-primary btnSave">@btnType <i class="bi bi-check2-circle custom-icon"></i></button>
+    <button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">Close <i class="bi bi-arrow-right-circle custom-icon"></i></button>
+</div>
+
+<script>
+    $(document).ready(function () {
+        if ('@Model.BANK_CRE_BY' != '') {
+            $("#BANK_CODE").attr('readonly', true);
+        }
+
+        $("#frmBank").validate({
+            rules: {
+                'BANK_CODE': {
+                    required: true
+                },
+                'BANK_NAME': {
+                    required: true,
+                    normalizer: function (value) {
+                        var trimmedValue = $.trim(value);
+                        if (trimmedValue == "") {
+                            $("#BANK_NAME").val(trimmedValue);
+                        }
+                        return trimmedValue;
+                    }
+                }
+            },
+            messages: {
+                'BANK_CODE': {
+                    required: 'Bank Code must be entered'
+                },
+                'BANK_NAME': {
+                    required: 'Bank Name must be entered'
+                }
+            },
+            errorPlacement: function (label, element) {
+                label.addClass('mt-2 text-danger');
+                label.insertAfter(element);
+            },
+            highlight: function (element, errorClass) {
+                $(element).parent().addClass('has-danger')
+                $(element).addClass('form-control-danger')
+            }, errorPlacement: function (label, element) {
+                if (element.parent('.input-group').length) {
+                    label.insertAfter(element.parent());
+                    label.addClass('mt-2 text-danger');
+                    // radio/checkbox?
+                } else if (element.hasClass('select2')) {
+                    label.insertAfter(element.next('span'));
+                    label.addClass('mt-2 text-danger');
+                    // select2
+                } else {
+                    label.insertAfter(element);
+                    label.addClass('mt-2 text-danger');
+                    // default
+                }
+            }
+        });
+
+        $("#BANK_CODE").blur(function () {
+            CheckBankCodeExists();
+        });
+
+        function CheckBankCodeExists() {
+            if ('@Model.BANK_CRE_BY' == '') {
+                var bankCode = $("#BANK_CODE").val();
+                var parm = { "bankCode": bankCode };
+                $.getJSON("/BankBranch/CheckBankCodeExists", parm,
+                function (data) {
+                    if (data == true) {
+                        $("#BANK_CODE_Error").css('display', 'inline-block').text('Bank Code Already Exists');
+                    }
+                    else {
+                        $("#BANK_CODE_Error").css('display', 'none');
+                    }
+                });
+            }
+        }
+
+        $("#BANK_NAME").blur(function () {
+            CheckBankNameExists();
+        });
+
+        function CheckBankNameExists() {
+            var bankName = $("#BANK_NAME").val();
+            var bankNameTrim = bankName.trim();
+            if (bankNameTrim != "") {
+                var bankCode = '@Model.BANK_CODE';
+                var creBy = '@Model.BANK_CRE_BY';
+                var parm = { "bankName": bankNameTrim, "bankCode": bankCode, "creBy": creBy };
+                $.getJSON("/BankBranch/CheckBankNameExists", parm,
+                    function (data) {
+                        if (data == true) {
+                            $("#BANK_NAME_Error").css('display', 'inline-block').text('Bank Name Already Exists');
+                            $("#BANK_NAME").val(bankNameTrim);
+                        }
+                        else {
+                            $("#BANK_NAME_Error").css('display', 'none');
+                            $("#BANK_NAME").val(bankNameTrim);
+                        }
+                    });
+            }
+        }
+
+        $('.btnSave').on('click', function () {
+            $.ajaxSetup({
+                async: false
+            });
+
+            if ($("#frmBank").valid()) {
+                CheckBankCodeExists();
+                CheckBankNameExists();
+                var error = $('.error').text();
+                if (error == "") {
+                    $("#frmBank").submit();
+                }
+            }
+        });
+    });
+</script>

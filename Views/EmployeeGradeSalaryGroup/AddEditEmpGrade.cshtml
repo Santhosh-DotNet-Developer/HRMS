@@ -1,0 +1,196 @@
+﻿@model HRMS.Models.EMPLOYEE_GRADE
+@{
+    Layout = null;
+    if (Model.EG_CRE_BY == null)
+    {
+        ViewBag.Title = "Employee Grade - Add New";
+    }
+    else
+    {
+        ViewBag.Title = "Employee Grade - Edit";
+    }
+}
+
+<div class="modal-header">
+    <h5 class="modal-title" id="empGradeModalLabel">@ViewBag.Title</h5>
+    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><i class="bi bi-x"></i></button>
+</div>
+<div class="modal-body">
+    @using (Html.BeginForm("SaveEmployeeGrade", "EmployeeGradeSalaryGroup", FormMethod.Post, new { @id = "frmEmpGrade" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(h => h.EG_CRE_BY)
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label><strong>Code</strong><span class="mantSpan"> *</span></label>
+                    @if (Model.EG_CRE_BY == null)
+                    {
+                        @Html.TextBoxFor(m => m.EG_CODE, new { @class = "form-control", @maxlength = "5", @placeholder = "Enter Code", @autocomplete = "off", @onkeypress = "return /[A-Za-z0-9]/.test(event.key)" })
+                    }
+                    else
+                    {
+                        @Html.TextBoxFor(m => m.EG_CODE, new { @class = "form-control", @disabled = "disabled" })
+                        @Html.HiddenFor(h => h.EG_CODE)
+                    }
+                    <label id="EG_CODE_Error" class="error text-danger mt-2" for="EG_CODE" style="display:none"></label>
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label><strong>Grade</strong><span class="mantSpan"> *</span></label>
+                    @Html.TextBoxFor(m => m.EG_NAME, new { @class = "form-control", @maxlength = "30", @placeholder = "Enter Grade", @autocomplete = "off", @onkeypress = "return /[A-Za-z0-9- ]/.test(event.key)" })
+                    <label id="EG_NAME_Error" class="error text-danger mt-2" for="EG_NAME" style="display:none"></label>
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label><strong>Salary Group</strong><span class="mantSpan"> *</span></label>
+                    @Html.DropDownListFor(m => m.EG_SAL_GRP_CODE, new SelectList(HRMS.Models.DropDownList.GetSalaryGroup(), "id", "text"), new { @class = "form-control select2", data_placeholder = "Select Salary Group", @style = "width:100%" })
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-primary btnSave">Save</button>
+    <button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">Close</button>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $(".select2").select2({
+            allowClear: true,
+            dropdownParent: $('#empGradeModalLabel')
+        });
+
+        $('#EG_SAL_GRP_CODE').on('select2:open', function () {
+            $('input.select2-search__field').attr('placeholder', 'Search Salary Group');
+        });
+
+        $("#frmEmpGrade").validate({
+            rules: {
+                'EG_CODE': {
+                    required: true
+                },
+                'EG_NAME': {
+                    required: true
+                },
+                'EG_SAL_GRP_CODE': {
+                    required: true
+                }
+            },
+            messages: {
+                'EG_CODE': {
+                    required: 'Code must be entered'
+                },
+                'EG_NAME': {
+                    required: 'Grade must be entered'
+                },
+                'EG_SAL_GRP_CODE': {
+                    required: 'Salary Group must be selected'
+                }
+            },
+            errorPlacement: function (label, element) {
+                label.addClass('mt-2 text-danger');
+                label.insertAfter(element);
+            },
+            highlight: function (element, errorClass) {
+                $(element).parent().addClass('has-danger')
+                $(element).addClass('form-control-danger')
+            }, errorPlacement: function (label, element) {
+                if (element.parent('.input-group').length) {
+                    label.insertAfter(element.parent());
+                    label.addClass('mt-2 text-danger');
+                    // radio/checkbox?
+                } else if (element.hasClass('select2')) {
+                    label.insertAfter(element.next('span'));
+                    label.addClass('mt-2 text-danger');
+                    // select2
+                } else {
+                    label.insertAfter(element);
+                    label.addClass('mt-2 text-danger');
+                    // default
+                }
+            }
+        });
+
+        $("#EG_CODE").blur(function () {
+            CheckEmployeeGradeCodeExists();
+        });
+
+        function CheckEmployeeGradeCodeExists() {
+            if ('@Model.EG_CRE_BY' == '') {
+                var inEmpGradeCode = $("#EG_CODE").val();
+                var inEmpGradeCodeTrim = inEmpGradeCode.trim();
+                var inEmpGradeCodeLength = inEmpGradeCode.length;
+                if (inEmpGradeCodeLength > 0 && inEmpGradeCodeTrim == "") {
+                    $("#EG_CODE_Error").css('display', 'block').text('Code must be entered');
+                    $("#EG_CODE").val(inEmpGradeCodeTrim);
+                }
+                else {
+                    if (inEmpGradeCodeTrim != "") {
+                        var parm = { "inEmpGradeCode": inEmpGradeCodeTrim };
+                        $.getJSON("/EmployeeGradeSalaryGroup/CheckEmployeeGradeCodeExists", parm,
+                            function (data) {
+                                if (data == true) {
+                                    $("#EG_CODE_Error").css('display', 'block').text('Code Already Exists');
+                                    $("#EG_CODE").val(inEmpGradeCodeTrim);
+                                }
+                                else {
+                                    $("#EG_CODE_Error").css('display', 'none').text('');
+                                }
+                            });
+                    }
+                }
+            }
+        }
+
+        $("#EG_NAME").blur(function () {
+            CheckEmployeeGradeExists();
+        });
+
+        function CheckEmployeeGradeExists() {
+            debugger
+            var inEmployeeGrade = $("#EG_NAME").val();
+            var inEmployeeGradeTrim = inEmployeeGrade.trim();
+            var inEmployeeGradeLength = inEmployeeGrade.length;
+            if (inEmployeeGradeLength > 0 && inEmployeeGradeTrim == "") {
+                $("#EG_NAME_Error").css('display', 'block').text('Grade must be entered');
+                $("#EG_NAME").val(inEmployeeGradeTrim);
+            }
+            else {
+                if (inEmployeeGradeTrim != "") {
+                    var inEmpGradeCode = '@Model.EG_CODE';
+                    var inCreBy = '@Model.EG_CRE_BY';
+                    var parm = { "inEmpGrade": inEmployeeGradeTrim, "inEmpGradeCode": inEmpGradeCode, "inCreBy": inCreBy };
+                    $.getJSON("/EmployeeGradeSalaryGroup/CheckEmployeeGradeExists", parm,
+                        function (data) {
+                            if (data == true) {
+                                $("#EG_NAME_Error").css('display', 'block').text('Grade Already Exists');
+                                $("#EG_NAME").val(inEmployeeGradeTrim);
+                            }
+                            else {
+                                $("#EG_NAME_Error").css('display', 'none').text('');
+                            }
+                        });
+                }
+            }
+        }
+
+        $('.btnSave').on('click', function () {
+            $.ajaxSetup({
+                async: false
+            });
+
+            if ($("#frmEmpGrade").valid()) {
+                CheckEmployeeGradeCodeExists();
+                CheckEmployeeGradeExists();
+                var error = $('.error').text();
+                if (error == "") {
+                    $("#frmEmpGrade").submit();
+                }
+            }
+        });
+    });
+</script>

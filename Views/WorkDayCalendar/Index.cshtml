@@ -1,0 +1,93 @@
+﻿@model List<HRMS.Models.WORK_DAY_CALENDAR_HD>
+@{
+    ViewBag.Title = "Work Day Calender";
+    ViewBag.Parent = "Configuration";
+}
+
+<div id="main-content">
+    <div class="page-heading">
+        <div class="page-title">
+            <div class="row">
+                <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="~/Home/Index">Home</a></li>
+                        <li class="breadcrumb-item">@ViewBag.Parent</li>
+                        <li class="breadcrumb-item active">@ViewBag.Title</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <section class="section">
+            <div class="card">
+                <div class="card-header">
+                    <a href="~/WorkDayCalendar/AddEditCalendar?docNo=0" class="btn btn-primary float-end">Add Calendar</a>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover" id="datatable">
+                                <thead>
+                                    <tr>
+                                        <th>S. No.</th>
+                                        <th>Unit</th>
+                                        <th>Year</th>
+                                        <th>Start Date</th>
+                                        <th>End Date</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{int i = 0;}
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td>@(i = i + 1)</td>
+                                            <td>@HRMS.Models.DropDownList.GetUnitName(item.WDCH_BU)</td>
+                                            <td>@item.WDCH_YEAR</td>
+                                            @if (item.WDCH_START_DATE != null)
+                                            {
+                                                <td>@item.WDCH_START_DATE.Value.ToString("dd-MM-yyyy")</td>
+                                            }
+                                            else
+                                            {
+                                                <td></td>
+                                            }
+                                            @if (item.WDCH_END_DATE != null)
+                                            {
+                                                <td>@item.WDCH_END_DATE.Value.ToString("dd-MM-yyyy")</td>
+                                            }
+                                            else
+                                            {
+                                                <td></td>
+                                            }
+                                            <td class="text-center">
+                                                @if (item.WDCH_STATUS == "N")
+                                                {
+                                                    <span class="badge bg-primary">New</span>
+                                                }
+                                                else if (item.WDCH_STATUS == "A")
+                                                {
+                                                    <span class="badge bg-success">Activated</span>
+                                                }
+                                            </td>
+                                            <td class="text-center">
+                                                <a href="~/WorkDayCalendar/AddEditCalendar?docNo=@item.WDCH_DOC_NO" title="Edit" class="edit"><i class="bi bi-pencil-square"></i></a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#loading").hide();
+    });
+</script>

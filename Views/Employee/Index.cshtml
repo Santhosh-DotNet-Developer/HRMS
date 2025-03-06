@@ -1,0 +1,80 @@
+﻿@model List<HRMS.Models.EMPLOYEE>
+@{
+    ViewBag.Title = "Employee";
+    ViewBag.Parent = "Configuration";
+}
+
+<div id="main-content">
+    <div class="page-heading">
+        <div class="page-title">
+            <div class="row">
+                <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="~/Home/Index">Home</a></li>
+                        <li class="breadcrumb-item">@ViewBag.Parent</li>
+                        <li class="breadcrumb-item active">@ViewBag.Title</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <section class="section">
+            <div class="card">
+                <div class="card-header">
+                    <a href="~/Employee/AddEdit?empCode=" class="btn btn-primary float-end">Add <i class="bi bi-person-plus-fill custom-icon"></i></a>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover" id="datatable">
+                                <thead>
+                                    <tr>
+                                        <th style="width:10%">S. No.</th>
+                                        <th style="width:10%">Code</th>
+                                        <th style="width:20%">Name</th>
+                                        <th style="width:20%">Department</th>
+                                        <th style="width:20%">Designation</th>
+                                        <th style="width:10%">Status</th>
+                                        <th style="width:10%">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{int i = 0;}
+                                    @foreach (var employee in Model)
+                                    {
+                                        <tr>
+                                            <td style="width:10%">@(i = i + 1)</td>
+                                            <td style="width:10%">@employee.EMP_CODE</td>
+                                            <td style="width:20%">@employee.EMP_FIRST_NAME</td>
+                                            <td style="width:20%">@HRMS.Models.DropDownList.GetDeptName(employee.EMP_DEPT_CODE)</td>
+                                            <td style="width:20%">@HRMS.Models.DropDownList.GetDesgName(employee.EMP_DESG_CODE)</td>
+                                            <td style="width:10%" class="text-center">
+                                                @if (employee.EMP_STATUS == true)
+                                                {
+                                                    <span class="badge bg-success">Active</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger">In-Active</span>
+                                                }
+                                            </td>
+                                            <td style="width:10%" class="text-center">
+                                                <a href="~/Employee/AddEdit?empCode=@employee.EMP_CODE" title="Edit"><i class="bi bi-pencil-square"></i></a>
+                                                <a href="~/Employee/Delete?empCode=@employee.EMP_CODE" title="Delete" class="delete"><i class="bi bi-trash"></i></a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#loading").hide();
+    });
+</script>

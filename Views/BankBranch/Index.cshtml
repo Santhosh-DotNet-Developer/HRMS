@@ -1,0 +1,143 @@
+﻿@model Tuple<List<HRMS.Models.BANK>, List<HRMS.Models.BANK_BRANCHES>>
+@{
+    ViewBag.Title = "Bank/Bank Branch";
+    ViewBag.Parent = "Configuration";
+    var curTab = ViewBag.CurTab;
+}
+
+<div id="main-content">
+    <div class="page-heading">
+        <div class="page-title">
+            <div class="row">
+                <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="~/Home/Index">Home</a></li>
+                        <li class="breadcrumb-item">@ViewBag.Parent</li>
+                        <li class="breadcrumb-item active">@ViewBag.Title</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <section class="section">
+            <div class="card">
+                <div class="card-body">
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link active" id="bank-tab" data-bs-toggle="tab" href="#bank" role="tab" aria-controls="bank" aria-selected="true">Bank</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="bankBranch-tab" data-bs-toggle="tab" href="#bankBranch" role="tab" aria-controls="bankBranch" aria-selected="false">Bank Branch</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="myTabContent">
+                        <div class="tab-pane fade show active" id="bank" role="tabpanel" aria-labelledby="bank-tab">
+                            <div class="card">
+                                <div class="card-header">
+                                    <a href="~/BankBranch/AddEditBank?bankCode=" data-bs-toggle="modal" data-bs-target="#bankModalPopUp" class="btn btn-primary float-end">Add Bank</a>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-hover" id="datatable">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width:10%">S. No.</th>
+                                                        <th style="width:20%">Bank Code</th>
+                                                        <th style="width:60%">Bank Name</th>
+                                                        <th style="width:10%">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @{int i = 0;}
+                                                    @foreach (var bank in Model.Item1)
+                                                    {
+                                                        <tr>
+                                                            <td style="width:10%">@(i = i + 1)</td>
+                                                            <td style="width:20%">@bank.BANK_CODE</td>
+                                                            <td style="width:60%">@bank.BANK_NAME</td>
+                                                            <td style="width:10%" class="text-center">
+                                                                <a href="~/BankBranch/AddEditBank?bankCode=@bank.BANK_CODE" class="edit" data-bs-toggle="modal" data-bs-target="#bankModalPopUp" title="Edit"><i class="bi bi-pencil-square"></i></a>
+                                                                <a href="~/BankBranch/DeleteBank?bankCode=@bank.BANK_CODE" title="Delete" class="delete"><i class="bi bi-trash"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="bankBranch" role="tabpanel" aria-labelledby="bankBranch-tab">
+                            <div class="card">
+                                <div class="card-header">
+                                    <a href="~/BankBranch/AddEditBankBranch?bankBranchId=0" data-bs-toggle="modal" data-bs-target="#bankBranchModalPopUp" class="btn btn-primary float-end">Add Branch</a>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-hover" id="datatable1">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width:10%">S. No.</th>
+                                                        <th style="width:20%">Bank</th>
+                                                        <th style="width:40%">Branch Name</th>
+                                                        <th style="width:20%">IFSC Code</th>
+                                                        <th style="width:10%">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @{int j = 0;}
+                                                    @foreach (var bankBranch in Model.Item2)
+                                                    {
+                                                        <tr>
+                                                            <td style="width:10%">@(j = j + 1)</td>
+                                                            <td style="width:20%">@HRMS.Models.DropDownList.GetBankName(bankBranch.BB_BANK_CODE)</td>
+                                                            <td style="width:40%">@bankBranch.BB_NAME</td>
+                                                            <td style="width:20%">@bankBranch.BB_IFSC_CODE</td>
+                                                            <td style="width:10%" class="text-center">
+                                                                <a href="~/BankBranch/AddEditBankBranch?bankBranchId=@bankBranch.BB_ID" data-bs-toggle="modal" data-bs-target="#bankBranchModalPopUp" class="edit"><i class="bi bi-pencil-square"></i></a>
+                                                                <a href="~/BankBranch/DeleteBankBranch?bankBranchId=@bankBranch.BB_ID" title="Delete" class="delete"><i class="bi bi-trash"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<div class="modal fade" id="bankModalPopUp" tabindex="-1" role="dialog" aria-labelledby="bankModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="bankBranchModalPopUp" tabindex="-1" aria-labelledby="bankBranchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#loading").hide();
+
+        if ('@curTab' == "Branch") {
+            $('#bankBranch-tab').tab('show');
+        }
+        else {
+            $('#bank-tab').tab('show');
+        }
+    });
+</script>

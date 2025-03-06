@@ -1,0 +1,357 @@
+﻿@model HRMS.Models.LEAVE_REQUEST
+@{
+    Layout = null;
+    if (Model.LR_CRE_BY == null)
+    {
+        ViewBag.Title = "Leave Request - Add New";
+    }
+    else
+    {
+        ViewBag.Title = "Leave Request - Edit";
+    }
+    Int16 BE = Convert.ToInt16(HttpContext.Current.Request.Cookies[Constant.BE].Value);
+    string empCode = HttpContext.Current.Request.Cookies[Constant.EmpCode].Value;
+    HRMS.Models.HRMSEntities db = new HRMS.Models.HRMSEntities();
+    var inFinYear = db.FINANCIAL_YEAR.Where(w => w.FY_BE == BE && w.FY_STATUS == "U").Select(s => s.FY_YEAR).SingleOrDefault();
+    var startDate = "01" + "-" + "Jan" + "-" + inFinYear;
+    var endDate = "31" + "-" + "Dec" + "-" + inFinYear;
+    string empName = HRMS.Models.DropDownList.GetEmployeeCodeName(empCode);
+}
+
+<div class="modal-header" id="levReqModalLabel">
+    <h5 class="modal-title">@ViewBag.Title</h5>
+    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><i class="bi bi-x"></i></button>
+</div>
+<div class="modal-body">
+    @using (Html.BeginForm("Save", "LeaveRequest", FormMethod.Post, new { @id = "frmLeaveRequest" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(h => h.LR_ID)
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="form-control-label"><strong>Employee</strong></label>
+                    <input type="text" id="Employee" class="form-control" readonly ="readonly" />
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="form-control-label"><strong>Start Date</strong><span class="mantSpan"> *</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-calendar" style="height:auto"></i></span>
+                        @if (Model.LR_START_DATE == null)
+                        {
+                            @Html.TextBoxFor(m => m.LR_START_DATE, new { @class = "form-control sDate", @placeholder = "Select Start Date", @readonly = "readonly" })
+                        }
+                        else
+                        {
+                            <input type="text" id="LR_START_DATE" name="LR_START_DATE" class="form-control sDate" value="@Model.LR_START_DATE.Value.ToString("dd-MM-yyyy")" readonly="readonly">
+                        }
+                    </div>
+                    <label id="LR_START_DATE_Error" class="error text-danger mt-2" for="LR_START_DATE" style="display:none"></label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <label class="form-control-label"><strong>Required Days</strong><span class="mantSpan"> *</span></label>
+                @Html.TextBoxFor(m => m.LR_NO_OF_DAYS, new { @class = "form-control", @placeholder = "Enter Required Days", @autocomplete = "off", @onkeypress = "return isNumberKey(event,this)", @min = 0.5 })
+            </div>
+            <div class="col-sm-6">
+                <label class="form-control-label"><strong>Session</strong><span class="mantSpan"> *</span></label>
+                @Html.DropDownListFor(m => m.LR_SESSION, new SelectList(HRMS.Models.DropDownList.GetValues("ST"), "id", "text"), new { @class = "form-control select2", @data_placeholder = "Select Session Type", @style = "width:100%", @disabled = "disabled" })
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="form-control-label"><strong>End Date</strong><span class="mantSpan"> *</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-calendar" style="height:auto"></i></span>
+                        @if (Model.LR_END_DATE == null)
+                        {
+                            @Html.TextBoxFor(m => m.LR_END_DATE, new { @class = "form-control eDate", @placeholder = "Select End Date", @disabled = "disabled" })
+                        }
+                        else
+                        {
+                            <input type="text" id="LR_END_DATE" name="LR_END_DATE" class="form-control eDate" value="@Model.LR_END_DATE.Value.ToString("dd-MM-yyyy")" disabled="disabled">
+                        }
+                    </div>
+                    <label id="LR_END_DATE_Error" class="error text-danger mt-2" for="LR_END_DATE" style="display:none"></label>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <label class="form-control-label"><strong>Leave Type</strong><span class="mantSpan"> *</span></label>
+                @Html.DropDownListFor(m => m.LR_TYPE, new SelectList(HRMS.Models.DropDownList.GetLeaveTypes(), "id", "text"), new { @class = "form-control select2", @data_placeholder = "Select Leave Type", @style = "width:100%" })
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <label class="form-control-label"><strong>Reason</strong><span class="mantSpan"> *</span></label>
+                @Html.TextAreaFor(m => m.LR_REASON, new { @class = "form-control", @placeholder = "Enter Reason" })
+            </div>
+        </div>
+    }
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-primary btnSave">Save</button>
+    <button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">Close</button>
+</div>
+
+<script>
+    $(document).ready(function () {
+        var session = false;
+        $(".select2").select2({
+            allowClear: true,
+            dropdownParent: $('#levReqModalLabel')
+        });
+
+        $('#LR_TYPE').on('select2:open', function () {
+            $('input.select2-search__field').attr('placeholder', 'Search Leave Type');
+        });
+
+        $('.sDate').datepicker({
+            autoclose: true,
+            keyboardNavigation: false,
+            format: "dd-mm-yyyy",
+            todayBtn: "linked",
+            forceParse: false,
+            todayHighlight: true,
+            startDate: '@startDate',
+            endDate: '@endDate'
+        });
+
+        $('.eDate').datepicker({
+            autoclose: true,
+            keyboardNavigation: false,
+            format: "dd-mm-yyyy",
+            todayBtn: "linked",
+            forceParse: false,
+            todayHighlight: true,
+            endDate: '0d'
+        });
+
+        $('#Employee').val('@empName');
+
+        $('#LR_TYPE option').filter(function () {
+            return /(CO|EL)/.test(this.value);
+        }).remove();
+
+        var options = $('#LR_SESSION option');
+        options.sort(function (a, b) {
+            return $(a).text().localeCompare($(b).text());
+        });
+
+        $('#LR_SESSION').empty().append(options);
+
+        $("#frmLeaveRequest").validate({
+            rules: {
+                'LR_START_DATE': {
+                    required: true
+                },
+                'LR_NO_OF_DAYS': {
+                    required: true
+                },
+                'LR_TYPE': {
+                    required: true
+                },
+                'LR_REASON': {
+                    required: true
+                },
+                'LR_SESSION': {
+                    required: {
+                        depends: function () {
+                            return session;
+                        }
+                    }
+                }
+            },
+            messages: {
+                'LR_START_DATE': {
+                    required: 'Start Date must be selected'
+                },
+                'LR_NO_OF_DAYS': {
+                    required: 'Required Days must be entered'
+                },
+                'LR_TYPE': {
+                    required: 'Leave Type must be selected'
+                },
+                'LR_REASON': {
+                    required: 'Reason must be entered'
+                },
+                'LR_SESSION': {
+                    required: 'Session must be selected'
+                }
+            },
+            errorPlacement: function (label, element) {
+                label.addClass('mt-2 text-danger');
+                label.insertAfter(element);
+            },
+            highlight: function (element, errorClass) {
+                $(element).parent().addClass('has-danger')
+                $(element).addClass('form-control-danger')
+            }, errorPlacement: function (label, element) {
+                if (element.parent('.input-group').length) {
+                    label.insertAfter(element.parent());
+                    label.addClass('mt-2 text-danger');
+                    // radio/checkbox?
+                } else if (element.hasClass('select2')) {
+                    label.insertAfter(element.next('span'));
+                    label.addClass('mt-2 text-danger');
+                    // select2
+                } else {
+                    label.insertAfter(element);
+                    label.addClass('mt-2 text-danger');
+                    // default
+                }
+            }
+        });
+
+        $('#LR_NO_OF_DAYS').on('input', function () {
+            calculateEnddate();
+        });
+
+        $('#LR_START_DATE').on('change', function () {
+            var startDate = $('#LR_START_DATE').val();
+            if (startDate != "") {
+                var dateParts = startDate.split("-");
+                var date = dateParts[2] + '-' + dateParts[1] + '-' + dateParts[0];
+                var params = { "inEmpCode": '@empCode', "inLevStDate": date };
+                $.getJSON("/LeaveRequest/CheckLeaveExists", params,
+                    function (result) {
+                        if (result) {
+                            swal({
+                                title: "Alert",
+                                text: '<span style="color:black">Leave request already raised for this date.</span>',
+                                type: "warning",
+                                html: true
+                            });
+                            $('#LR_START_DATE').val("");
+                        }
+                        else {
+                            calculateEnddate();
+                        }
+                    });
+            }
+        });
+
+        function calculateEnddate() {
+            var startDate = $('#LR_START_DATE').val();
+            var noOfDays = $('#LR_NO_OF_DAYS').val();
+            if (startDate != "" && noOfDays != "") {
+                noOfDays = parseFloat(noOfDays);
+                var dateParts = startDate.split("-");
+                var date = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
+                var days = "";
+                if (noOfDays <= 1) {
+                    days = 0;
+                }
+                else {
+                    days = noOfDays - 1;
+                }
+                days = Math.ceil(days);
+                date.setDate(date.getDate() + days);
+                var endDate = ("0" + date.getDate()).slice(-2) + "-" + ("0" + (date.getMonth() + 1)).slice(-2) + "-" + date.getFullYear();
+                $('#LR_END_DATE').val(endDate);
+            }
+            else {
+                $('#LR_END_DATE').val("");
+            }
+        }
+
+        $('#LR_NO_OF_DAYS').on('blur', function () {
+            var noOfDays = $('#LR_NO_OF_DAYS').val();
+            if (noOfDays != "") {
+                noOfDays = parseFloat(noOfDays);
+                var isDecimal = noOfDays % 1;
+                if (isDecimal != 0) {
+                    $('#LR_SESSION').attr("disabled", false);
+                    session = true;
+                }
+                else {
+                    $('#LR_SESSION').attr("disabled", true);
+                    session = false;
+                    $('#LR_SESSION').val("");
+                    $('#LR_SESSION-error').css('display', 'none').text("");
+                }
+            }
+        });
+
+        $('.btnSave').on('click', function () {
+            if ($("#frmLeaveRequest").valid()) {
+                var error = $('.error').text();
+                if (error == "") {
+                    $('#LR_END_DATE').attr("disabled", false);
+                    $("#frmLeaveRequest").submit();
+                }
+            }
+        });
+    });
+
+    function isNumberKey(evt, element) {
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        if (charCode > 31 && (charCode < 48 || charCode > 57) && !(charCode == 46 || charCode == 8))
+            return false;
+        else {
+            var len = $(element).val().length;
+            var max = '1,1';
+            var maxLen = max.split(',');
+            var lenBeforeDot = maxLen[0];
+            var lenAfterDot = maxLen[1];
+            var charLen = (parseInt(lenBeforeDot) + parseInt(lenAfterDot)) + 1;
+            var dotCharLen = lenBeforeDot - 1;
+            var value = element.value + String.fromCharCode(charCode);
+            if (len < charLen) {
+                var elementId = $(element).attr("id");
+                var ctl = document.getElementById(elementId);
+                startPos = ctl.selectionStart;
+                var index = $(element).val().indexOf('.');
+                if (index >= 0 && charCode == 46) {
+                    return false;
+                }
+                if (index > 0) {
+                    var CharAfterdot = len - (index + 1);
+                    var CharBeforedot = len - (CharAfterdot + 1);
+
+                    if (CharBeforedot > lenBeforeDot) {
+                        return false;
+                    }
+                    else if (startPos - 1 < index) {
+                        return true;
+                    }
+                    if (CharAfterdot >= lenAfterDot) {
+                        return false;
+                    }
+                }
+                else {
+                    if (len > dotCharLen) {
+                        if (startPos <= lenBeforeDot && charCode == 46) {
+                            return true;
+                        }
+                        else if (index == 0) {
+                            var CharAfterdot = len - (index + 1);
+                            var CharBeforedot = len - (CharAfterdot + 1);
+
+                            if (CharBeforedot > lenBeforeDot) {
+                                return false;
+                            }
+                            else if (startPos - 1 < index) {
+                                return true;
+                            }
+                            if (CharAfterdot >= lenAfterDot) {
+                                return false;
+                            }
+                        }
+                        else {
+                            return false;
+                        }
+                    }
+                }
+            }
+            else {
+                return false;
+            }
+        }
+        return true;
+    };
+</script>

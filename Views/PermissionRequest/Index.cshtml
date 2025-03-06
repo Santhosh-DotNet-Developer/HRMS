@@ -1,0 +1,295 @@
+﻿@model HRMS.Models.PermissionRequestModel
+@{
+    ViewBag.Title = "Permission Request/History";
+    ViewBag.Parent = "Employee Self Service";
+    var curTab = ViewBag.CurTab;
+    string role = HttpContext.Current.Request.Cookies[Constant.Role].Value.ToLower();
+}
+
+<div id="main-content">
+    <div class="page-heading">
+        <div class="page-title">
+            <div class="row">
+                <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="~/Home/Index">Home</a></li>
+                        <li class="breadcrumb-item">@ViewBag.Parent</li>
+                        <li class="breadcrumb-item active">@ViewBag.Title</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <section class="section">
+            <div class="card">
+                <div class="card-body">
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link active" id="perReq-tab" data-bs-toggle="tab" href="#perReq" role="tab" aria-controls="perReq" aria-selected="true">Permission Request</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="perReqHist-tab" data-bs-toggle="tab" href="#perReqHist" role="tab" aria-controls="perReqHist" aria-selected="false">Permission Request History</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="myTabContent">
+                        <div class="tab-pane fade show active" id="perReq" role="tabpanel" aria-labelledby="perReq-tab">
+                            <div class="card">
+                                <div class="card-header">
+                                    <a href="~/PermissionRequest/AddEditPermissionRequest?inperReqId=0" data-bs-toggle="modal" data-bs-target="#perReqModalPopUp" class="btn btn-primary float-end">Add Permission Request</a>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-hover" id="customDatatable">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width:10%">S. No.</th>
+                                                        <th style="width:15%">Employee</th>
+                                                        <th style="width:13%">Start Time</th>
+                                                        <th style="width:14%">Total Hours</th>
+                                                        <th style="width:13%">End Time</th>
+                                                        <th style="width:15%">Reason</th>
+                                                        <th style="width:10%">Status</th>
+                                                        <th style="width:10%">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @{int i = 0;}
+                                                    @foreach (var perReq in Model.PermissionRequest)
+                                                    {
+                                                        <tr>
+                                                            <td style="width:10%">@(i = i + 1)</td>
+                                                            <td style="width:15%">@HRMS.Models.DropDownList.GetEmployeeCodeName(perReq.PR_EMP_CODE)</td>
+                                                            <td style="width:13%">@perReq.PR_START_TIME</td>
+                                                            <td style="width:14%">@perReq.PR_HOURS</td>
+                                                            <td style="width:13%">@perReq.PR_END_TIME</td>
+                                                            <td style="width:15%">@perReq.PR_REASON</td>
+                                                            <td style="width:10%" class="text-center">
+                                                                @if (perReq.PR_STATUS == "N")
+                                                                {
+                                                                    <span class="badge bg-primary">New</span>
+                                                                }
+                                                            </td>
+                                                            <td style="width:10%" class="text-center">
+                                                                @if (role == "manager" || role == "hr manager")
+                                                                {
+                                                                    <a href="~/PermissionRequest/Approve?inPerReqId=@perReq.PR_ID" title="Approve" class="approve" data-inperreqid=@perReq.PR_ID><i class="bi bi-check-circle-fill"></i></a><span>&nbsp;&nbsp;</span>
+                                                                    <a href="~/PermissionRequest/Reject?inPerReqId=@perReq.PR_ID" title="Reject" class="reject" data-inperreqid=@perReq.PR_ID><i class="bi bi-x-circle-fill" style="color: #fa3434;"></i></a>
+                                                                }
+                                                                else
+                                                                {
+                                                                    if (role == "admin" && perReq.PR_CRE_BY == "admin")
+                                                                    {
+                                                                        <a href="#" title="Cancel" class="cancel" data-inperreqid=@perReq.PR_ID><i class="bi bi-x-square-fill" style="color: #fa3434;"></i></a>
+                                                                    }
+                                                                    else if (role != "admin")
+                                                                    {
+                                                                        <a href="#" title="Cancel" class="cancel" data-inperreqid=@perReq.PR_ID><i class="bi bi-x-square-fill" style="color: #fa3434;"></i></a>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <span>-</span>
+                                                                    }
+                                                                }
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="perReqHist" role="tabpanel" aria-labelledby="perReqHist-tab">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-hover" id="datatable1">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width:10%">S. No.</th>
+                                                        <th style="width:15%">Employee</th>
+                                                        <th style="width:13%">Start Time</th>
+                                                        <th style="width:14%">Total Hours</th>
+                                                        <th style="width:13%">End Time</th>
+                                                        <th style="width:10%">Status</th>
+                                                        <th style="width:15%">Reason</th>
+                                                        <th style="width:10%">Apr./Rej. By</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @{int j = 0;}
+                                                    @foreach (var perReqHist in Model.PermissionRequestHist)
+                                                    {
+                                                        <tr>
+                                                            <td style="width:10%">@(j = j + 1)</td>
+                                                            <td style="width:15%">@HRMS.Models.DropDownList.GetEmployeeCodeName(perReqHist.PR_EMP_CODE)</td>
+                                                            <td style="width:13%">@perReqHist.PR_START_TIME</td>
+                                                            <td style="width:14%">@perReqHist.PR_HOURS</td>
+                                                            <td style="width:13%">@perReqHist.PR_END_TIME</td>
+                                                            <td style="width:10%" class="text-center">
+                                                                @if (perReqHist.PR_STATUS == "N")
+                                                                {
+                                                                    <span class="badge bg-primary">New</span>
+                                                                }
+                                                                else if (perReqHist.PR_STATUS == "C")
+                                                                {
+                                                                    <span class="badge bg-danger">Canceled</span>
+                                                                }
+                                                                else if (perReqHist.PR_STATUS == "A")
+                                                                {
+                                                                    <span class="badge bg-success">Approved</span>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="badge bg-danger">Rejected</span>
+                                                                }
+                                                            </td>
+                                                            <td style="width:15%">@perReqHist.PR_REASON</td>
+                                                            <td style="width:10%">@perReqHist.PR_UPD_BY</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<div class="modal fade" id="perReqModalPopUp" tabindex="-1" aria-labelledby="perReqModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="cancelModalPopUp" tabindex="-1" role="dialog" aria-labelledby="cancelModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#loading").hide();
+
+        if ('@curTab' == "History") {
+            $('#perReqHist-tab').tab('show');
+        }
+        else {
+            $('#perReq-tab').tab('show');
+        }
+
+        var datatable = document.querySelector('#customDatatable');
+        if (datatable) {
+            var dt = new simpleDatatables.DataTable("#customDatatable", {
+                perPageSelect: [5, 10, 25, 100, -1],
+                perPage: 10,
+            });
+
+            datatable.addEventListener('click', function (e) {
+                if (e.target.closest('a.cancel')) {
+                    e.preventDefault();
+                    var link = e.target.closest('a.cancel');
+                    var inperReqId = link.getAttribute('data-inperReqId');
+                    swal({
+                        title: "Alert",
+                        text: '<span style="color:black"><span> ' + 'Are you sure you want to cancel?',
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Yes, cancel it.",
+                        cancelButtonText: "No cancel, please.",
+                        closeOnConfirm: true,
+                        closeOnCancel: true,
+                        showLoaderOnConfirm: true,
+                        html: true
+                    },
+                    function (result) {
+                        if (result) {
+                            $.ajax({
+                                url: '@Url.Action("CancelPermissionRequest", "PermissionRequest")',
+                                type: 'GET',
+                                data: { inperReqId: inperReqId, type: "Cancel" },
+                                success: function (data) {
+                                    $('#cancelModalPopUp .modal-content').html(data);
+                                    $('#cancelModalPopUp').modal('show');
+                                },
+                                error: function () {
+                                    alert('Failed to load content.');
+                                }
+                            });
+                        }
+                    });
+                }
+
+                if (e.target.closest('a.approve')) {
+                    e.preventDefault();
+                    var link = e.target.closest('a.approve');
+                    swal({
+                        title: "Alert",
+                        text: '<span style="color:black"><span> ' + 'Are you sure you want to approve?',
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Yes, approve it.",
+                        cancelButtonText: "No cancel, please.",
+                        closeOnConfirm: true,
+                        closeOnCancel: true,
+                        showLoaderOnConfirm: true,
+                        html: true
+                    },
+                    function (result) {
+                        if (result) {
+                            if (link != undefined) {
+                                window.location.href = link.href;
+                            }
+                        }
+                    });
+                }
+
+                if (e.target.closest('a.reject')) {
+                    e.preventDefault();
+                    var link = e.target.closest('a.reject');
+                    var inperReqId = link.getAttribute('data-inperReqId');
+                    swal({
+                        title: "Alert",
+                        text: '<span style="color:black"><span> ' + 'Are you sure you want to reject?',
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Yes, reject it.",
+                        cancelButtonText: "No cancel, please.",
+                        closeOnConfirm: true,
+                        closeOnCancel: true,
+                        showLoaderOnConfirm: true,
+                        html: true
+                    },
+                    function (result) {
+                        debugger
+                        if (result) {
+                            $.ajax({
+                                url: '@Url.Action("CancelPermissionRequest", "PermissionRequest")',
+                                type: 'GET',
+                                data: { inperReqId: inperReqId, type: "Reject" },
+                                success: function (data) {
+                                    $('#cancelModalPopUp .modal-content').html(data);
+                                    $('#cancelModalPopUp').modal('show');
+                                },
+                                error: function () {
+                                    alert('Failed to load content.');
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+    });
+</script>

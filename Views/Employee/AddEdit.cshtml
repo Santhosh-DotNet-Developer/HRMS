@@ -1,0 +1,1300 @@
+﻿@model HRMS.Models.EMPLOYEE
+@{
+    if (Model.EMP_CRE_BY == null)
+    {
+        ViewBag.Title = "Employee - Add New";
+    }
+    else
+    {
+        ViewBag.Title = "Employee - Edit";
+    }
+    ViewBag.Parent = "Configuration";
+    string aadharFile = "", panFile = "";
+    if (Model.EMP_AADHAR_FILE_URL != null)
+    {
+        aadharFile = Path.GetFileName(Model.EMP_AADHAR_FILE_URL);
+    }
+    if (Model.EMP_PAN_FILE_URL != null)
+    {
+        panFile = Path.GetFileName(Model.EMP_PAN_FILE_URL);
+    }
+}
+
+<style>
+    #EMP_PER_ADDR_FLAG:focus {
+        outline: none;
+        box-shadow: none;
+    }
+
+    hr {
+        margin-top: 0;
+    }
+
+    .custom-switch {
+        height: 2em !important;
+        width: 3.5em !important;
+        border: 1px solid #e1e3ea !important;
+    }
+
+    input[type="file"] {
+        color: transparent;
+    }
+
+    .setTableHead {
+        color: rgba(35,28,99,.7);
+    }
+</style>
+
+<div id="main-content">
+    <div class="page-heading">
+        <div class="page-title">
+            <div class="row">
+                <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="~/Home/Index">Home</a></li>
+                        <li class="breadcrumb-item">@ViewBag.Parent</li>
+                        <li class="breadcrumb-item active">@ViewBag.Title</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <section class="section">
+            <div class="card">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-sm-6 mt-1">
+                            <h5 class="mx-2">@ViewBag.Title</h5>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="float-end">
+                                @if (Model.EMP_CRE_BY == null)
+                                {
+                                    <button type="button" class="btn btn-primary btnSave">Save <i class="bi bi-check2-circle custom-icon"></i></button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-primary btnSave">Update <i class="bi bi-check2-circle custom-icon"></i></button>
+                                }
+                                @*<a href="~/Employee/Index" class="btn btn-light-secondary">Close <i class="bi bi-box-arrow-in-right custom-icon"></i></a>*@
+                                <a href="~/Employee/Index" class="btn btn-light-secondary">Close <i class="bi bi-arrow-right-circle custom-icon"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr />
+                <div class="card-body">
+                    @using (Html.BeginForm("Save", "Employee", FormMethod.Post, new { @id = "frmEmployee", @enctype = "multipart/form-data" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Basic Details</h5>
+                                <hr />
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-sm-9">
+                                        <div class="row">
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="form-control-label"><strong>Employee Code</strong><span class="mantSpan"> *</span></label>
+                                                    @Html.TextBoxFor(m => m.EMP_CODE, new { @class = "form-control", @readonly = "readonly" })
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="form-control-label"><strong>First Name</strong><span class="mantSpan"> *</span></label>
+                                                    @Html.TextBoxFor(m => m.EMP_FIRST_NAME, new { @class = "form-control", @maxlength = "30", @placeholder = "Enter First Name", @autocomplete = "off", @onkeypress = "return /[A-Za-z ]/.test(event.key)" })
+                                                    <label id="EMP_FIRST_NAME_Error" class="error text-danger mt-2" for="EMP_FIRST_NAME" style="display:none"></label>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="form-control-label"><strong>Last Name</strong><span class="mantSpan"> *</span></label>
+                                                    @Html.TextBoxFor(m => m.EMP_LAST_NAME, new { @class = "form-control", @maxlength = "15", @placeholder = "Enter Last Name", @autocomplete = "off", @onkeypress = "return /[A-Za-z ]/.test(event.key)" })
+                                                    <label id="EMP_LAST_NAME_Error" class="error text-danger mt-2" for="EMP_LAST_NAME" style="display:none"></label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="form-control-label"><strong>Father/Gurdian Name</strong><span class="mantSpan"> *</span></label>
+                                                    @Html.TextBoxFor(m => m.EMP_FATHER_NAME, new { @class = "form-control", @maxlength = "30", @placeholder = "Enter Father/Gurdian Name", @autocomplete = "off", @onkeypress = "return /[A-Za-z ]/.test(event.key)" })
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="form-control-label"><strong>Gender</strong><span class="mantSpan"> *</span></label>
+                                                    @Html.DropDownListFor(m => m.EMP_GENDER, new SelectList(HRMS.Models.DropDownList.GetValues("GT"), "id", "text"), new { @class = "form-control select2", @data_placeholder = "Select Gender", @style = "width:100%" })
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="form-control-label"><strong>Marital Status</strong><span class="mantSpan"> *</span></label>
+                                                    @Html.DropDownListFor(m => m.EMP_MRT_STATUS, new SelectList(HRMS.Models.DropDownList.GetValues("MS"), "id", "text"), new { @class = "form-control select2", @data_placeholder = "Select Marital Status", @style = "width:100%" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="form-control-label"><strong>Date of Birth</strong><span class="mantSpan"> *</span></label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text"><i class="bi bi-calendar" style="height:auto"></i></span>
+                                                        @if (Model.EMP_DOB == null)
+                                                        {
+                                                            @Html.TextBoxFor(m => m.EMP_DOB, new { @class = "form-control dob", @placeholder = "Select Date of Birth", @readonly = "readonly" })
+                                                        }
+                                                        else
+                                                        {
+                                                            <input type="text" id="EMP_DOB" name="EMP_DOB" class="form-control dob" value="@Model.EMP_DOB.Value.ToString("dd-MM-yyyy")" readonly="readonly">
+                                                        }
+                                                    </div>
+                                                    <label id="EMP_DOB_Error" class="error text-danger mt-2" for="EMP_DOB" style="display:none"></label>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="form-control-label"><strong>Date of Joining</strong><span class="mantSpan"> *</span></label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text"><i class="bi bi-calendar" style="height:auto"></i></span>
+                                                        @if (Model.EMP_DOJ == null)
+                                                        {
+                                                            @Html.TextBoxFor(m => m.EMP_DOJ, new { @class = "form-control doj", @placeholder = "Select Date of Joining", @readonly = "readonly" })
+                                                        }
+                                                        else
+                                                        {
+                                                            <input type="text" id="EMP_DOJ" name="EMP_DOJ" class="form-control doj" value="@Model.EMP_DOJ.Value.ToString("dd-MM-yyyy")" readonly="readonly">
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="form-control-label"><strong>Mobile No.</strong><span class="mantSpan"> *</span></label>
+                                                    @Html.TextBoxFor(m => m.EMP_MOB_NO, new { @class = "form-control", @maxlength = "15", @placeholder = "Enter Mobile No.", @autocomplete = "off", @onkeypress = "return /[+- 0-9]/.test(event.key)" })
+                                                    <label id="EMP_MOB_NO_Error" class="error text-danger mt-2" for="EMP_MOB_NO" style="display:none"></label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="form-control-label"><strong>Alter Mobile No.</strong></label>
+                                                    @Html.TextBoxFor(m => m.EMP_ALT_MOB_NO, new { @class = "form-control", @maxlength = "15", @placeholder = "Enter Alter Mobile No.", @autocomplete = "off", @onkeypress = "return /[+- 0-9]/.test(event.key)" })
+                                                    <label id="EMP_ALT_MOB_NO_Error" class="error text-danger mt-2" for="EMP_ALT_MOB_NO" style="display:none"></label>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="form-control-label"><strong>Email ID</strong><span class="mantSpan"> *</span></label>
+                                                    @Html.TextBoxFor(m => m.EMP_EMAIL_ID, new { @class = "form-control", @maxlength = "50", @placeholder = "Enter Email ID", @autocomplete = "off", @onkeypress = "return /[A-Za-z0-9@.]/.test(event.key)" })
+                                                    <label id="EMP_EMAIL_ID_Error" class="error text-danger mt-2" for="EMP_EMAIL_ID" style="display:none"></label>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="form-control-label"><strong>Department</strong><span class="mantSpan"> *</span></label>
+                                                    @Html.DropDownListFor(m => m.EMP_DEPT_CODE, new SelectList(HRMS.Models.DropDownList.GetDepartments(), "id", "text"), new { @class = "form-control select2", @data_placeholder = "Select Department", @style = "width:100%" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="row">
+                                            @if (String.IsNullOrEmpty(Model.EMP_IMAGE_URL))
+                                            {
+                                                <img src="~/Content/images/logo/NoImage.jpg" id="image-div" height="200" width="215">
+                                            }
+                                            else
+                                            {
+                                                <img src="../../@Model.EMP_IMAGE_URL" id="image-div" height="200" width="215">
+                                            }
+                                            @Html.HiddenFor(m => m.EMP_IMAGE_URL)
+                                        </div>
+                                        <div class="text-center mt-3">
+                                            <label title="Upload Photo" for="photo" class="btn btn-primary">Upload <i class="bi bi-upload custom-icon"></i></label>
+                                            <button type="button" id="clear" class="btn btn-light-secondary">Clear <i class="bi bi-eraser custom-icon"></i></button>
+                                            <input type="file" accept="image/*" id="photo" name="photo" style='visibility: hidden;font-size:small'>
+                                            <label id="EMP_IMAGE_URL_Error" class="error text-danger mt-2" style="display:none"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="form-control-label"><strong>Designation</strong><span class="mantSpan"> *</span></label>
+                                            @Html.DropDownListFor(m => m.EMP_DESG_CODE, new SelectList(HRMS.Models.DropDownList.GetDesignations(), "id", "text"), new { @class = "form-control select2", @data_placeholder = "Select Designation", @style = "width:100%" })
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="form-control-label"><strong>Grade</strong><span class="mantSpan"> *</span></label>
+                                            @Html.DropDownListFor(m => m.EMP_GRADE, new SelectList(HRMS.Models.DropDownList.GetEmployeeGrade(), "id", "text"), new { @class = "form-control select2", @data_placeholder = "Select Grade", @style = "width:100%" })
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="form-control-label"><strong>Educational Detail</strong><span class="mantSpan"> *</span></label>
+                                            @Html.DropDownListFor(m => m.EMP_EDU_DET, new SelectList(HRMS.Models.DropDownList.GetValues("ED"), "id", "text"), new { @class = "form-control select2", @data_placeholder = "Select Educational Detail", @style = "width:100%" })
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="form-control-label"><strong>Educational Domain</strong><span class="mantSpan"> *</span></label>
+                                            @Html.TextBoxFor(m => m.EMP_EDU_DOM, new { @class = "form-control", @maxlength = "50", @placeholder = "Enter Educational Domain", @autocomplete = "off", @onkeypress = "return /[A-Za-z ]/.test(event.key)" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <label class="form-control-label"><strong>Blood Group</strong><span class="mantSpan"> *</span></label>
+                                        @Html.DropDownListFor(m => m.EMP_BLOOD_GRP, new SelectList(HRMS.Models.DropDownList.GetValues("BG"), "id", "text"), new { @class = "form-control select2", @data_placeholder = "Select Blood Group", @style = "width:100%" })
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label class="form-control-label"><strong>Language</strong><span class="mantSpan"> *</span></label>
+                                        @Html.DropDownList("languages", new MultiSelectList(HRMS.Models.DropDownList.GetLanguages("L"), "id", "text"), new { @class = "form-control select2", @data_placeholder = "Select Language", @style = "width:100%", @multiple = "multiple" })
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <label class="form-control-label"><strong>Status</strong></label>
+                                        <div class="form-check form-switch">
+                                            @Html.CheckBoxFor(m => m.EMP_STATUS, new { @class = "form-control form-check-input custom-switch" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Address Details</h5>
+                                <hr />
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <span class="float-end">
+                                            Current Address and Permanent Address are Different @Html.CheckBoxFor(m => m.EMP_PER_ADDR_FLAG, new { @class = "form-check-input form-check-primary" })
+                                        </span>
+                                        <div class="form-group">
+                                            <label class="form-control-label"><strong>Current Address</strong><span class="mantSpan"> *</span></label>
+                                            @Html.TextAreaFor(m => m.EMP_CUR_ADDR, new { @class = "form-control", @maxlength = "100", @placeholder = "Enter Current Address", @autocomplete = "off", @onkeypress = "return /[A-Za-z0-9/,'. ]/.test(event.key)" })
+                                            <label id="EMP_CUR_ADDR_Error" class="error text-danger mt-2" for="EMP_CUR_ADDR" style="display:none"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="form-control-label"><strong>Pincode</strong><span class="mantSpan"> *</span></label>
+                                            @Html.TextBoxFor(m => m.EMP_CUR_ADDR_PINCODE, new { @class = "form-control", @maxlength = "6", @placeholder = "Enter Pincode", @autocomplete = "off", @onkeypress = "return /[0-9]/.test(event.key)" })
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="form-control-label"><strong>City</strong><span class="mantSpan"> *</span></label>
+                                            @Html.DropDownListFor(m => m.EMP_CUR_CITY, new SelectList(HRMS.Models.DropDownList.GetCities(), "id", "text"), new { @class = "form-control select2", data_placeholder = "Select City", @style = "width:100%" })
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="form-control-label"><strong>State</strong><span class="mantSpan"> *</span></label>
+                                            @Html.DropDownListFor(m => m.EMP_CUR_STATE, new SelectList(HRMS.Models.DropDownList.GetStates(), "id", "text"), new { @class = "form-control select2", data_placeholder = "Select State", @style = "width:100%", @disabled = "disabled" })
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="form-control-label"><strong>Country</strong><span class="mantSpan"> *</span></label>
+                                            @Html.DropDownListFor(m => m.EMP_CUR_COUNTRY, new SelectList(HRMS.Models.DropDownList.GetCountries(), "id", "text"), new { @class = "form-control select2", data_placeholder = "Select Country", @style = "width:100%", @disabled = "disabled" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="perAddress-content" style="display:none;">
+                                    <hr />
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div class="form-group">
+                                                <label class="form-control-label"><strong>Permanant Address</strong><span class="mantSpan"> *</span></label>
+                                                @Html.TextAreaFor(m => m.EMP_PER_ADDR, new { @class = "form-control", @maxlength = "100", @placeholder = "Enter Permanant Address", @autocomplete = "off", @onkeypress = "return /[A-Za-z0-9,'. ]/.test(event.key)" })
+                                                <label id="EMP_PER_ADDR_Error" class="error text-danger mt-2" for="EMP_PER_ADDR" style="display:none"></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label class="form-control-label"><strong>Pincode</strong><span class="mantSpan"> *</span></label>
+                                                @Html.TextBoxFor(m => m.EMP_PER_ADDR_PINCODE, new { @class = "form-control", @maxlength = "6", @placeholder = "Enter Pincode", @autocomplete = "off", @onkeypress = "return /[0-9]/.test(event.key)" })
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label class="form-control-label"><strong>City</strong><span class="mantSpan"> *</span></label>
+                                                @Html.DropDownListFor(m => m.EMP_PER_CITY, new SelectList(HRMS.Models.DropDownList.GetCities(), "id", "text"), new { @class = "form-control select2", data_placeholder = "Select City", @style = "width:100%" })
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label class="form-control-label"><strong>State</strong><span class="mantSpan"> *</span></label>
+                                                @Html.DropDownListFor(m => m.EMP_PER_STATE, new SelectList(HRMS.Models.DropDownList.GetStates(), "id", "text"), new { @class = "form-control select2", data_placeholder = "Select State", @style = "width:100%", @disabled = "disabled" })
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label class="form-control-label"><strong>Country</strong><span class="mantSpan"> *</span></label>
+                                                @Html.DropDownListFor(m => m.EMP_PER_COUNTRY, new SelectList(HRMS.Models.DropDownList.GetCountries(), "id", "text"), new { @class = "form-control select2", data_placeholder = "Select Country", @style = "width:100%", @disabled = "disabled" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Bank Details</h5>
+                                <hr />
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    @if (Model.EMP_CRE_BY == null)
+                                    {
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label class="form-control-label"><strong>City</strong><span class="mantSpan"> *</span></label>
+                                                @Html.DropDownList("City", new SelectList(HRMS.Models.DropDownList.GetCities(), "id", "text"), new { @class = "form-control select2", data_placeholder = "Select City", @style = "width:100%" })
+                                            </div>
+                                        </div>
+                                    }
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="form-control-label"><strong>Bank</strong><span class="mantSpan"> *</span></label>
+                                            @Html.DropDownListFor(m => m.EMP_BANK_CODE, new SelectList(HRMS.Models.DropDownList.GetBanks(), "id", "text"), new { @class = "form-control select2", data_placeholder = "Select Bank", @style = "width:100%" })
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="form-control-label"><strong>Branch</strong><span class="mantSpan"> *</span></label>
+                                            @Html.DropDownListFor(m => m.EMP_BANK_BRANCH_ID, new SelectList(HRMS.Models.DropDownList.GetBankBranches(), "id", "text"), new { @class = "form-control select2", data_placeholder = "Select Branch", @style = "width:100%", @disabled = "disabled" })
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="form-control-label"><strong>IFSC Code</strong><span class="mantSpan"> *</span></label>
+                                            @Html.TextBoxFor(m => m.EMP_IFSC_CODE, new { @class = "form-control", @placeholder = "Enter IFSC Code", @readonly = "readonly" })
+                                            <label id="EMP_IFSC_CODE_Error" class="error text-danger mt-2" for="EMP_IFSC_CODE" style="display:none"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label"><strong>Account No.</strong><span class="mantSpan"> *</span></label>
+                                            @Html.TextBoxFor(m => m.EMP_ACC_NO, new { @class = "form-control", @maxlength = "16", @placeholder = "Enter Account No.", @autocomplete = "off", @onkeypress = "return /[0-9]/.test(event.key)" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Salary Details</h5>
+                                <hr />
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="form-control-label"><strong>Basic Salary</strong><span class="mantSpan"> *</span></label>
+                                            @Html.TextBoxFor(m => m.EMP_BASIC, new { @class = "form-control salCalculation", @placeholder = "Enter Basic Salary", @autocomplete = "off", @onkeypress = "return /[0-9.]/.test(event.key)" })
+                                            <label id="EMP_BASIC_Error" class="error text-danger mt-2" for="EMP_BASIC" style="display:none"></label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="form-control-label"><strong>Dearness Allowance</strong></label>
+                                            @Html.TextBoxFor(m => m.EMP_DA, new { @class = "form-control salCalculation", @placeholder = "Enter Dearness Allowance", @autocomplete = "off", @onkeypress = "return /[0-9.]/.test(event.key)" })
+                                            <label id="EMP_DA_Error" class="error text-danger mt-2" for="EMP_DA" style="display:none"></label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="form-control-label"><strong>House Rent Allowance</strong></label>
+                                            @Html.TextBoxFor(m => m.EMP_HRA, new { @class = "form-control salCalculation", @placeholder = "Enter House Rent Allowance", @autocomplete = "off", @onkeypress = "return /[0-9.]/.test(event.key)" })
+                                            <label id="EMP_HRA_Error" class="error text-danger mt-2" for="EMP_HRA" style="display:none"></label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="form-control-label"><strong>Conveyance Allowance</strong></label>
+                                            @Html.TextBoxFor(m => m.EMP_CA, new { @class = "form-control salCalculation", @placeholder = "Enter Conveyance Allowance", @autocomplete = "off", @onkeypress = "return /[0-9.]/.test(event.key)" })
+                                            <label id="EMP_CA_Error" class="error text-danger mt-2" for="EMP_CA" style="display:none"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="form-control-label"><strong>Medical Allowance</strong></label>
+                                            @Html.TextBoxFor(m => m.EMP_MA, new { @class = "form-control salCalculation", @placeholder = "Enter Medical Allowance", @autocomplete = "off", @onkeypress = "return /[0-9.]/.test(event.key)" })
+                                            <label id="EMP_MA_Error" class="error text-danger mt-2" for="EMP_MA" style="display:none"></label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="form-control-label"><strong>Other Allowance</strong></label>
+                                            @Html.TextBoxFor(m => m.EMP_OTHERS, new { @class = "form-control salCalculation", @placeholder = "Enter Other Allowance", @autocomplete = "off", @onkeypress = "return /[0-9.]/.test(event.key)" })
+                                            <label id="EMP_OTHERS_Error" class="error text-danger mt-2" for="EMP_OTHERS" style="display:none"></label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="form-control-label"><strong>Net Salary</strong><span class="mantSpan"> *</span></label>
+                                            @Html.TextBoxFor(m => m.EMP_SALARY, new { @class = "form-control", @placeholder = "Enter Net Salary", @autocomplete = "off", @onkeypress = "return /[0-9.]/.test(event.key)", @readonly = "readonly" })
+                                            <label id="EMP_SALARY_Error" class="error text-danger mt-2" for="EMP_SALARY" style="display:none"></label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="form-control-label"><strong>Last Payroll Year</strong></label>
+                                            @Html.DropDownListFor(m => m.EMP_LAST_PAYR_YEAR, new SelectList(HRMS.Models.DropDownList.GetFinYear(), "id", "text"), new { @class = "form-control select2", data_placeholder = "Select Year", @style = "width:100%", @disabled = "disabled" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="form-control-label"><strong>Last Payroll Period</strong></label>
+                                            @Html.DropDownListFor(m => m.EMP_LAST_PAYR_PERIOD, new SelectList(HRMS.Models.DropDownList.GetValues("FP"), "id", "text"), new { @class = "form-control select2", data_placeholder = "Select Period", @style = "width:100%", @disabled = "disabled" })
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="form-control-label"><strong>Casual Leave</strong></label>
+                                            @Html.TextBoxFor(m => m.EMP_CL, new { @class = "form-control", @placeholder = "Enter Casual Leave", @autocomplete = "off", @onkeypress = "return /[0-9.]/.test(event.key)", @readonly = "readonly" })
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="form-control-label"><strong>Earned Leave</strong></label>
+                                            @Html.TextBoxFor(m => m.EMP_EL, new { @class = "form-control", @placeholder = "Enter Earned Leave", @autocomplete = "off", @onkeypress = "return /[0-9.]/.test(event.key)", @readonly = "readonly" })
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="form-control-label"><strong>Comp Off Leave</strong></label>
+                                            @Html.TextBoxFor(m => m.EMP_COL, new { @class = "form-control", @placeholder = "Enter Comp Off Leave", @autocomplete = "off", @onkeypress = "return /[0-9.]/.test(event.key)", @readonly = "readonly" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>PF/ESI Details</h5>
+                                <hr />
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="form-control-label"><strong>PF No.</strong><span class="mantSpan"> *</span></label>
+                                            @Html.TextBoxFor(m => m.EMP_PF_NO, new { @class = "form-control", @maxlength = "22", @placeholder = "Enter PF No.", @autocomplete = "off", @onkeypress = "return /[A-Za-z0-9]/.test(event.key)" })
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="form-control-label"><strong>ESI No.</strong><span class="mantSpan"> *</span></label>
+                                            @Html.TextBoxFor(m => m.EMP_ESI_NO, new { @class = "form-control", @maxlength = "17", @placeholder = "Enter ESI No.", @autocomplete = "off", @onkeypress = "return /[0-9 ]/.test(event.key)" })
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="form-control-label"><strong>UAN No.</strong><span class="mantSpan"> *</span></label>
+                                            @Html.TextBoxFor(m => m.EMP_UAN_NO, new { @class = "form-control", @maxlength = "12", @placeholder = "Enter UAN No.", @autocomplete = "off", @onkeypress = "return /[0-9]/.test(event.key)" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Personal Details</h5>
+                                <hr />
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="row mt-3">
+                                            <div class="col-sm-8">
+                                                <div class="form-group">
+                                                    <label class="form-control-label"><strong>Aadhar No.</strong><span class="mantSpan"> *</span></label>
+                                                    @Html.TextBoxFor(m => m.EMP_AADHAR_NO, new { @class = "form-control", @maxlength = "12", @placeholder = "Enter Aadhar No.", @autocomplete = "off", @onkeypress = "return /[0-9]/.test(event.key)" })
+                                                </div>
+                                            </div>
+                                            @if (Model.EMP_AADHAR_FILE_URL == null)
+                                            {
+                                                <div class="col-sm-4">
+                                                    <div class="form-group">
+                                                        <label class="form-control-label"><strong>Upload Aadhar</strong></label>
+                                                        <input type="file" name="aadhar" id="EMP_AADHAR_FILE_URL" accept="application/pdf" />
+                                                        <label id="EMP_AADHAR_FILE_URL_Error" class="error text-danger mt-2" style="display:none"></label>
+                                                    </div>
+                                                </div>
+                                            }
+                                            @Html.HiddenFor(m => m.EMP_AADHAR_FILE_URL)
+                                        </div>
+                                    </div>
+                                    @if (Model.EMP_AADHAR_FILE_URL != null)
+                                    {
+                                        <div class="col-sm-6">
+                                            <div class="row">
+                                                <div class="col-sm-12">
+                                                    <table class="table table-responsive setTableHead">
+                                                        <tr>
+                                                            <th style="width:90%">
+                                                                <strong>File</strong>
+                                                            </th>
+                                                            <th style="width:10%">
+                                                                <strong>Action</strong>
+                                                            </th>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="width:90%">
+                                                                @aadharFile
+                                                            </td>
+                                                            <td style="width:10%">
+                                                                <a href="~/Employee/DownloadFile?empCode=@Model.EMP_CODE&type=Aadhar" target="_self" class="bi bi-download" title="Download"></a>&nbsp;&nbsp;
+                                                                <a href="~/Employee/DeleteFile?empCode=@Model.EMP_CODE&type=Aadhar" title="Delete" class="delete"><i class="bi bi-trash"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="row mt-3">
+                                            <div class="col-sm-8">
+                                                <div class="form-group">
+                                                    <label class="form-control-label"><strong>PAN No.</strong><span class="mantSpan"> *</span></label>
+                                                    @Html.TextBoxFor(m => m.EMP_PAN_NO, new { @class = "form-control", @maxlength = "10", @placeholder = "Enter PAN No.", @autocomplete = "off", @onkeypress = "return /[A-Z0-9]/.test(event.key)" })
+                                                </div>
+                                            </div>
+                                            @if (Model.EMP_PAN_FILE_URL == null)
+                                            {
+                                                <div class="col-sm-4">
+                                                    <div class="form-group">
+                                                        <label class="form-control-label"><strong>Upload PAN</strong></label>
+                                                        <input type="file" name="pan" id="EMP_PAN_FILE_URL" accept="application/pdf" />
+                                                        <label id="EMP_PAN_FILE_URL_Error" class="error text-danger mt-2" style="display:none"></label>
+                                                    </div>
+                                                </div>
+                                            }
+                                            @Html.HiddenFor(m => m.EMP_PAN_FILE_URL)
+                                        </div>
+                                    </div>
+                                    @if (Model.EMP_PAN_FILE_URL != null)
+                                    {
+                                        <div class="col-sm-6">
+                                            <table class="table table-responsive setTableHead">
+                                                <tr>
+                                                    <th style="width:90%">
+                                                        <strong>File</strong>
+                                                    </th>
+                                                    <th style="width:10%">
+                                                        <strong>Action</strong>
+                                                    </th>
+                                                </tr>
+                                                <tr>
+                                                    <td style="width:90%">
+                                                        @panFile
+                                                    </td>
+                                                    <td style="width:10%">
+                                                        <a href="~/Employee/DownloadFile?empCode=@Model.EMP_CODE&type=Pan" target="_self" class="bi bi-download" title="Download"></a>&nbsp;&nbsp;
+                                                        <a href="~/Employee/DeleteFile?empCode=@Model.EMP_CODE&type=Pan" title="Delete" class="delete"><i class="bi bi-trash"></i></a>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $(".select2").select2({
+            allowClear: true,
+        });
+
+        $('#EMP_GENDER').on('select2:open', function () {
+            $('input.select2-search__field').attr('placeholder', 'Search Gender');
+        });
+
+        $('#EMP_MRT_STATUS').on('select2:open', function () {
+            $('input.select2-search__field').attr('placeholder', 'Search Marital Status');
+        });
+
+        $('#EMP_DEPT_CODE').on('select2:open', function () {
+            $('input.select2-search__field').attr('placeholder', 'Search Department');
+        });
+
+        $('#EMP_DESG_CODE').on('select2:open', function () {
+            $('input.select2-search__field').attr('placeholder', 'Search Designation');
+        });
+
+        $('#EMP_GRADE').on('select2:open', function () {
+            $('input.select2-search__field').attr('placeholder', 'Search Grade');
+        });
+
+        $('#EMP_EDU_DET').on('select2:open', function () {
+            $('input.select2-search__field').attr('placeholder', 'Search Education Detail');
+        });
+
+        $('#EMP_BLOOD_GRP').on('select2:open', function () {
+            $('input.select2-search__field').attr('placeholder', 'Search Blood Group');
+        });
+
+        $('#EMP_CUR_CITY').on('select2:open', function () {
+            $('input.select2-search__field').attr('placeholder', 'Search City');
+        });
+
+        $('#EMP_PER_CITY').on('select2:open', function () {
+            $('input.select2-search__field').attr('placeholder', 'Search City');
+        });
+
+        $('#City').on('select2:open', function () {
+            $('input.select2-search__field').attr('placeholder', 'Search City');
+        });
+
+        $('#EMP_BANK_CODE').on('select2:open', function () {
+            $('input.select2-search__field').attr('placeholder', 'Search Bank');
+        });
+
+        $('#EMP_BANK_BRANCH_ID').on('select2:open', function () {
+            $('input.select2-search__field').attr('placeholder', 'Search Branch');
+        });
+
+        if ('@Model.EMP_PER_ADDR_FLAG' == 'True') {
+            $(".perAddress-content").css('display', 'block');
+        }
+
+        $('#EMP_PER_ADDR_FLAG').click(function () {
+            if ($("#EMP_PER_ADDR_FLAG").is(':checked')) {
+                $(".perAddress-content").css('display', 'block');
+            }
+            else {
+                $(".perAddress-content").css('display', 'none');
+                $("#EMP_PER_ADDR").val("");
+                $("#EMP_PER_ADDR_PINCODE").val("");
+                $("#EMP_PER_CITY").val("").trigger("change");
+            }
+        });
+
+        $('.dob').datepicker({
+            autoclose: true,
+            keyboardNavigation: false,
+            format: "dd-M-yyyy",
+            todayBtn: "linked",
+            forceParse: false,
+            todayHighlight: true,
+            endDate: '0d'
+        });
+
+        $('.doj').datepicker({
+            autoclose: true,
+            keyboardNavigation: false,
+            format: "dd-M-yyyy",
+            todayBtn: "linked",
+            forceParse: false,
+            todayHighlight: true,
+            endDate: '0d'
+        });
+
+        var language = '@Model.EMP_LANGUAGE';
+        if (language != null) {
+            var selectedValues = language.split(',');
+            $("#languages").val(selectedValues).trigger("change");
+        }
+
+        $("#frmEmployee").validate({
+            rules: {
+                'EMP_FIRST_NAME': {
+                    required: true,
+                    normalizer: function (value) {
+                        var trimmedValue = $.trim(value);
+                        if (trimmedValue == "") {
+                            $("#EMP_FIRST_NAME").val(trimmedValue);
+                        }
+                        return trimmedValue;
+                    }
+                },
+                'EMP_LAST_NAME': {
+                    required: true,
+                    normalizer: function (value) {
+                        var trimmedValue = $.trim(value);
+                        if (trimmedValue == "") {
+                            $("#EMP_LAST_NAME").val(trimmedValue);
+                        }
+                        return trimmedValue;
+                    }
+                },
+                'EMP_FATHER_NAME': {
+                    required: true,
+                    normalizer: function (value) {
+                        var trimmedValue = $.trim(value);
+                        if (trimmedValue == "") {
+                            $("#EMP_FATHER_NAME").val(trimmedValue);
+                        }
+                        return trimmedValue;
+                    }
+                },
+                'EMP_GENDER': {
+                    required: true
+                },
+                'EMP_MRT_STATUS': {
+                    required: true
+                },
+                'EMP_DOB': {
+                    required: true
+                },
+                'EMP_DOJ': {
+                    required: true
+                },
+                'EMP_MOB_NO': {
+                    required: true,
+                    normalizer: function (value) {
+                        var trimmedValue = $.trim(value);
+                        if (trimmedValue == "") {
+                            $("#EMP_MOB_NO").val(trimmedValue);
+                        }
+                        return trimmedValue;
+                    }
+                },
+                'EMP_EMAIL_ID': {
+                    required: true
+                },
+                'EMP_DEPT_CODE': {
+                    required: true
+                },
+                'EMP_DESG_CODE': {
+                    required: true
+                },
+                'EMP_GRADE': {
+                    required: true
+                },
+                'EMP_EDU_DET': {
+                    required: true
+                },
+                'EMP_EDU_DOM': {
+                    required: true,
+                    normalizer: function (value) {
+                        var trimmedValue = $.trim(value);
+                        if (trimmedValue == "") {
+                            $("#EMP_EDU_DOM").val(trimmedValue);
+                        }
+                        return trimmedValue;
+                    }
+                },
+                'EMP_BLOOD_GRP': {
+                    required: true
+                },
+                'EMP_LANGUAGE': {
+                    required: true
+                },
+                'EMP_CUR_ADDR': {
+                    required: true,
+                    normalizer: function (value) {
+                        var trimmedValue = $.trim(value);
+                        if (trimmedValue == "") {
+                            $("#EMP_CUR_ADDR").val(trimmedValue);
+                        }
+                        return trimmedValue;
+                    }
+                },
+                'EMP_CUR_ADDR_PINCODE': {
+                    required: true
+                },
+                'EMP_CUR_CITY': {
+                    required: true
+                },
+                'EMP_PER_ADDR': {
+                    required: {
+                        depends: function () {
+                            var isdepend = false;
+                            if ($("#EMP_PER_ADDR_FLAG").is(':checked')) {
+                                isdepend = true;
+                            }
+                            return isdepend;
+                        }
+                    },
+                    normalizer: function (value) {
+                        var trimmedValue = $.trim(value);
+                        if (trimmedValue == "") {
+                            $("#EMP_PER_ADDR").val(trimmedValue);
+                        }
+                        return trimmedValue;
+                    }
+                },
+                'EMP_PER_ADDR_PINCODE': {
+                    required: {
+                        depends: function () {
+                            var isdepend = false;
+                            if ($("#EMP_PER_ADDR_FLAG").is(':checked')) {
+                                isdepend = true;
+                            }
+                            return isdepend;
+                        }
+                    }
+                },
+                'EMP_PER_CITY': {
+                    required: {
+                        depends: function () {
+                            var isdepend = false;
+                            if ($("#EMP_PER_ADDR_FLAG").is(':checked')) {
+                                isdepend = true;
+                            }
+                            return isdepend;
+                        }
+                    }
+                },
+                'City': {
+                    required: {
+                        depends: function () {
+                            var isdepend = false;
+                            if ('@Model.EMP_CRE_BY' == null) {
+                                isdepend = true;
+                            }
+                            return isdepend;
+                        }
+                    }
+                },
+                'EMP_BANK_CODE': {
+                    required: true
+                },
+                'EMP_BANK_BRANCH_ID': {
+                    required: true
+                },
+                'EMP_ACC_NO': {
+                    required: true
+                },
+                'EMP_BASIC': {
+                    required: true
+                },
+                'EMP_PF_NO': {
+                    required: true
+                },
+                'EMP_ESI_NO': {
+                    required: true,
+                    normalizer: function (value) {
+                        var trimmedValue = $.trim(value);
+                        if (trimmedValue == "") {
+                            $("#EMP_ESI_NO").val(trimmedValue);
+                        }
+                        return trimmedValue;
+                    }
+                },
+                'EMP_UAN_NO': {
+                    required: true
+                },
+                'EMP_AADHAR_NO': {
+                    required: true
+                },
+                'EMP_PAN_NO': {
+                    required: true
+                }
+            },
+            messages: {
+                'EMP_FIRST_NAME': {
+                    required: 'First Name must be entered'
+                },
+                'EMP_LAST_NAME': {
+                    required: 'Last Name must be entered'
+                },
+                'EMP_FATHER_NAME': {
+                    required: 'Father/Gurdian Name must be entered'
+                },
+                'EMP_GENDER': {
+                    required: 'Gender must be selected'
+                },
+                'EMP_MRT_STATUS': {
+                    required: 'Marital Status must be selected'
+                },
+                'EMP_DOB': {
+                    required: 'Date of Birth must be selected'
+                },
+                'EMP_DOJ': {
+                    required: 'Date of Joining must be selected'
+                },
+                'EMP_MOB_NO': {
+                    required: 'Mobile No. must be entered'
+                },
+                'EMP_EMAIL_ID': {
+                    required: 'Email ID must be entered'
+                },
+                'EMP_DEPT_CODE': {
+                    required: 'Department must be selected'
+                },
+                'EMP_DESG_CODE': {
+                    required: 'Designation must be selected'
+                },
+                'EMP_GRADE': {
+                    required: 'Grade must be selected'
+                },
+                'EMP_EDU_DET': {
+                    required: 'Educational Detail must be selected'
+                },
+                'EMP_EDU_DOM': {
+                    required: 'Educational Domain must be entered'
+                },
+                'EMP_BLOOD_GRP': {
+                    required: 'Blood Group must be selected'
+                },
+                'EMP_LANGUAGE': {
+                    required: 'Language must be selected'
+                },
+                'EMP_CUR_ADDR': {
+                    required: 'Current Address must be entered'
+                },
+                'EMP_CUR_ADDR_PINCODE': {
+                    required: 'Pincode must be entered'
+                },
+                'EMP_CUR_CITY': {
+                    required: 'City must be selected'
+                },
+                'EMP_PER_ADDR': {
+                    required: 'Permanant Address must be entered'
+                },
+                'EMP_PER_ADDR_PINCODE': {
+                    required: 'Pincode must be entered'
+                },
+                'EMP_PER_CITY': {
+                    required: 'City must be selected'
+                },
+                'City': {
+                    required: 'City must be selected'
+                },
+                'EMP_BANK_CODE': {
+                    required: 'Bank must be selected'
+                },
+                'EMP_BANK_BRANCH_ID': {
+                    required: 'Branch must be selected'
+                },
+                'EMP_ACC_NO': {
+                    required: 'Account No. must be entered'
+                },
+                'EMP_BASIC': {
+                    required: 'Basic Salary must be entered'
+                },
+                'EMP_PF_NO': {
+                    required: 'PF No. must be entered'
+                },
+                'EMP_ESI_NO': {
+                    required: 'ESI No. must be entered'
+                },
+                'EMP_UAN_NO': {
+                    required: 'UAN No. must be entered'
+                },
+                'EMP_AADHAR_NO': {
+                    required: 'Aadhar No. must be entered'
+                },
+                'EMP_PAN_NO': {
+                    required: 'PAN No. must be entered'
+                }
+            },
+            errorPlacement: function (label, element) {
+                label.addClass('mt-2 text-danger');
+                label.insertAfter(element);
+            },
+            highlight: function (element, errorClass) {
+                $(element).parent().addClass('has-danger')
+                $(element).addClass('form-control-danger')
+            }, errorPlacement: function (label, element) {
+                if (element.parent('.input-group').length) {
+                    label.insertAfter(element.parent());
+                    label.addClass('mt-2 text-danger');
+                    // radio/checkbox?
+                } else if (element.hasClass('select2')) {
+                    label.insertAfter(element.next('span'));
+                    label.addClass('mt-2 text-danger');
+                    // select2
+                } else {
+                    label.insertAfter(element);
+                    label.addClass('mt-2 text-danger');
+                    // default
+                }
+            }
+        });
+
+        function readFileURL(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#image-div').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+            else {
+                $("#image-div").attr("src", '/Content/images/logo/NoImage.jpg');
+            }
+        }
+
+        $("#clear").click(function () {
+            $('#image-div').attr('src', '/Content/images/logo/NoImage.jpg');
+            $("#photo").val('');
+            $("#EMP_IMAGE_URL").val("");
+            $("#EMP_IMAGE_URL_Error").css('display', 'none').text("");
+        });
+
+        $("#photo").change(function () {
+            readFileURL(this);
+            var fileValue = $(this).val();
+            var fileName = fileValue.toLowerCase();
+            var fileInpSize = $(this)[0].files[0].size;
+            var fileSize = 2;
+            var fileByteSize = 0;
+            if (fileSize > 0) {
+                fileByteSize = (fileSize * 1024) * 1024;
+            }
+            if (fileInpSize > fileByteSize) {
+                $("#EMP_IMAGE_URL_Error").css('display', 'block').text("Please choose a file less than or equal to 2MB");
+                $('#image-div').attr('src', '/Content/images/logo/NoImage.jpg');
+                $("#photo").val('');
+            }
+            else {
+                $("#EMP_IMAGE_URL_Error").css('display', 'none').text("");
+            }
+        });
+
+        $("#EMP_AADHAR_FILE_URL").change(function () {
+            var fileInpSize = $(this)[0].files[0].size;
+            var fileMaxSize = 2;//MB
+            var fileByteSize = (fileMaxSize * 1024) * 1024;
+            if (fileInpSize > fileByteSize) {
+                $("#EMP_AADHAR_FILE_URL_Error").css('display', 'block').text("Please choose a file less than or equal to 2MB");
+            }
+            else {
+                $("#EMP_AADHAR_FILE_URL").css("visibility", "visible");
+                $("#EMP_AADHAR_FILE_URL").css("color", "#435ebe");
+                $("#EMP_AADHAR_FILE_URL_Error").text("");
+            }
+        });
+
+        $("#EMP_PAN_FILE_URL").change(function () {
+            var fileInpSize = $(this)[0].files[0].size;
+            var fileMaxSize = 2;//MB
+            var fileByteSize = (fileMaxSize * 1024) * 1024;
+            if (fileInpSize > fileByteSize) {
+                $("#EMP_PAN_FILE_URL_Error").css('display', 'block').text("Please choose a file less than or equal to 2MB");
+            }
+            else {
+                $("#EMP_PAN_FILE_URL").css("visibility", "visible");
+                $("#EMP_PAN_FILE_URL").css("color", "#435ebe");
+                $("#EMP_PAN_FILE_URL_Error").text("");
+            }
+        });
+
+        $('.salCalculation').on('input', function () {
+            var BASIC = +$('#EMP_BASIC').val() || 0;
+            var DA = +$('#EMP_DA').val() || 0;
+            var HRA = +$('#EMP_HRA').val() || 0;
+            var CA = +$('#EMP_CA').val() || 0;
+            var MA = +$('#EMP_MA').val() || 0;
+            var OTHERS = +$('#EMP_OTHERS').val() || 0;
+            var Total = parseFloat(BASIC) + parseFloat(DA) + parseFloat(HRA) + parseFloat(CA) + parseFloat(MA) + parseFloat(OTHERS);
+            $('#EMP_SALARY').val(Total);
+        })
+
+        $("#EMP_CUR_CITY").change(function () {
+            var cityId = $("#EMP_CUR_CITY").val();
+            if (cityId != "") {
+                var parm = { "cityId": cityId };
+                $.getJSON("/Employee/GetStateCountry", parm,
+                function (data) {
+                    if (data.redirectUrl) {
+                        window.location = data.redirectUrl;
+                    }
+                    else if (data != "") {
+                        $("#EMP_CUR_STATE").val(data[0]).trigger("change");
+                        $("#EMP_CUR_COUNTRY").val(data[1]).trigger("change");
+                    }
+                });
+            }
+            else {
+                $("#EMP_CUR_STATE").val("").trigger("change");
+                $("#EMP_CUR_COUNTRY").val("").trigger("change");
+            }
+        });
+
+        $("#EMP_PER_CITY").change(function () {
+            var cityId = $("#EMP_PER_CITY").val();
+            if (cityId != "") {
+                var parm = { "cityId": cityId };
+                $.getJSON("/Employee/GetStateCountry", parm,
+                function (data) {
+                    if (data.redirectUrl) {
+                        window.location = data.redirectUrl;
+                    }
+                    else if (data != "") {
+                        $("#EMP_PER_STATE").val(data[0]).trigger("change");
+                        $("#EMP_PER_COUNTRY").val(data[1]).trigger("change");
+                    }
+                });
+            }
+            else {
+                $("#EMP_PER_STATE").val("").trigger("change");
+                $("#EMP_PER_COUNTRY").val("").trigger("change");
+            }
+        });
+
+        $("#EMP_BANK_CODE").change(function () {
+            var cityId = $("#City").val();
+            var bankCode = $("#EMP_BANK_CODE").val();
+            if (cityId != "" && bankCode != "") {
+                $("#EMP_BANK_BRANCH_ID").attr("disabled", false);
+                var parm = { "cityId": cityId, "bankCode": bankCode };
+                $.getJSON("/Employee/GetBankBranches", parm,
+                function (data) {
+                    if (data.redirectUrl) {
+                        window.location = data.redirectUrl;
+                    }
+                    else {
+                        $("#EMP_BANK_BRANCH_ID").select2('destroy');
+                        $("#EMP_BANK_BRANCH_ID").html("");
+                        $("#EMP_BANK_BRANCH_ID").append($('<option></option>').val('').html(''));
+                        $.each(data, function (i, value) {
+                            $("#EMP_BANK_BRANCH_ID").append($('<option></option>').val(value.id).html(value.text));
+                        });
+                        $(".select2").select2({
+                            allowClear: true
+                        });
+                    }
+                });
+            }
+            else {
+                $("#EMP_BANK_BRANCH_ID").val("").trigger("change");
+                $("#EMP_BANK_BRANCH_ID").attr("disabled", true);
+            }
+        });
+
+        $("#EMP_BANK_BRANCH_ID").change(function () {
+            var bankBranchId = $("#EMP_BANK_BRANCH_ID").val();
+            if (bankBranchId != "") {
+                var parm = { "bankBranchId": bankBranchId };
+                $.getJSON("/Employee/GetIFSCCode", parm,
+                function (data) {
+                    if (data.redirectUrl) {
+                        window.location = data.redirectUrl;
+                    }
+                    else if (data != "") {
+                        $("#EMP_IFSC_CODE").val(data).trigger("change");
+                    }
+                });
+            }
+            else {
+                $("#EMP_IFSC_CODE").val("").trigger("change");
+            }
+        });
+
+        $('#EMP_MOB_NO').blur(function () {
+            CheckMobileNoValid();
+        });
+
+        function CheckMobileNoValid() {
+            var mobileNo = $('#EMP_MOB_NO').val();
+            var trim = mobileNo.trim();
+            if (trim != "") {
+                var regex = /^(\+91[-\s]?([-][\s]?)?|0091[-\s]?([-][\s]?)?|091[-\s]?([-][\s]?)?|91[-\s]?([-][\s]?)?|0)?[6-9]\d{4}[-\s]?\d{5}$/;
+                if (regex.test(trim)) {
+                    $('#EMP_MOB_NO_Error').css('display', 'none').text("");
+                    $("#EMP_MOB_NO").val(trim);
+                }
+                else {
+                    $('#EMP_MOB_NO_Error').css('display', 'block').text("Please enter valid Mobile No.");
+                    $("#EMP_MOB_NO").val(trim);
+                }
+            }
+        }
+
+        $('#EMP_EMAIL_ID').on('blur', function () {
+            CheckEmailValid();
+        });
+
+        function CheckEmailValid() {
+            var email = $('#EMP_EMAIL_ID').val();
+            var trim = email.trim();
+            if (trim != "") {
+                var regex = /^\w+([-+.'][^\s]\w+)*@@\w+([-.]\w+)*\.\w+([-.]\w+)*$/
+                if (regex.test(trim)) {
+                    $("#EMP_EMAIL_ID_Error").css('display', 'none').text("");
+                    $('#EMP_EMAIL_ID').val(trim);
+                }
+                else {
+                    $("#EMP_EMAIL_ID_Error").css('display', 'block').text("Please enter valid Email ID");
+                    $('#EMP_EMAIL_ID').val(trim);
+                }
+            }
+        }
+
+        $('#EMP_DOB').on('change', function () {
+            var dob = $('#EMP_DOB').val();
+            dob = new Date(dob);
+            var currentDate = new Date();
+            var age = currentDate.getFullYear() - dob.getFullYear();
+            var monthDiff = currentDate.getMonth() - dob.getMonth();
+
+            // If the birth month hasn't occurred yet this year or it's the birth month but the day hasn't occurred yet, decrease age by 1.
+            if (monthDiff < 0 || (monthDiff === 0 && currentDate.getDate() < dob.getDate())) {
+                age--;
+            }
+
+            if (age < 18) {
+                swal({
+                    title: "Alert",
+                    text: '<span style="color:black">You must be 18 years old or above</span>',
+                    type: "warning",
+                    html: true
+                });
+            }
+        });
+
+        $('.btnSave').on('click', function () {
+            $.ajaxSetup({
+                async: false
+            });
+
+            if ($("#frmEmployee").valid()) {
+                CheckMobileNoValid();
+                CheckEmailValid();
+                var error = $('.error').text();
+                if (error == "") {
+                    $("#EMP_CUR_STATE").attr("disabled", false);
+                    $("#EMP_CUR_COUNTRY").attr("disabled", false);
+                    if ($("#EMP_PER_ADDR_FLAG").is(':checked')) {
+                        $("#EMP_PER_STATE").attr("disabled", false);
+                        $("#EMP_PER_COUNTRY").attr("disabled", false);
+                    }
+                    else {
+                        $("#EMP_PER_ADDR_FLAG").attr('checked', false);
+                    }
+                    $("#EMP_BANK_BRANCH_ID").attr("disabled", false);
+                    $("#EMP_LAST_PAYR_YEAR").attr("disabled", false);
+                    $("#EMP_LAST_PAYR_PERIOD").attr("disabled", false);
+                    $("#frmEmployee").submit();
+                }
+            }
+            else {
+                CheckMobileNoValid();
+                CheckEmailValid()
+            }
+        });
+    });
+</script>

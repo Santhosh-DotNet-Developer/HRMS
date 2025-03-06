@@ -1,0 +1,191 @@
+﻿@model HRMS.Models.STATE
+@{
+    Layout = null;
+    if (Model.STATE_CRE_BY == null)
+    {
+        ViewBag.Title = "State - Add New";
+    }
+    else
+    {
+        ViewBag.Title = "State - Edit";
+    }
+}
+
+<div class="modal-header">
+    <h5 class="modal-title" id="stateModalLabel">@ViewBag.Title</h5>
+    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><i class="bi bi-x"></i></button>
+</div>
+<div class="modal-body">
+    @using (Html.BeginForm("SaveState", "CityStateCountry", FormMethod.Post, new { @id = "frmState" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(h => h.STATE_CRE_BY)
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label><strong>State Code</strong><span class="mantSpan"> *</span></label>
+                    @if (Model.STATE_CRE_BY == null)
+                    {
+                        @Html.TextBoxFor(m => m.STATE_CODE, new { @class = "form-control", @maxlength = "10", @placeholder = "Enter State Code", @autocomplete = "off", @onkeypress = "return /[A-Za-z ]/.test(event.key)" })
+                    }
+                    else
+                    {
+                        @Html.TextBoxFor(m => m.STATE_CODE, new { @class = "form-control", @maxlength = "10", @placeholder = "Enter State Code", @autocomplete = "off", @onkeypress = "return /[A-Za-z ]/.test(event.key)", @disabled = "disabled" })
+                        @Html.HiddenFor(h => h.STATE_CODE)
+                    }
+                    <label id="STATE_CODE_Error" class="error text-danger mt-2" for="STATE_CODE" style="display:none"></label>
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label><strong>State Name</strong><span class="mantSpan"> *</span></label>
+                    @Html.TextBoxFor(m => m.STATE_NAME, new { @class = "form-control", @maxlength = "30", @placeholder = "Enter State Name", @autocomplete = "off", @onkeypress = "return /[A-Za-z ]/.test(event.key)" })
+                    <label id="STATE_NAME_Error" class="error text-danger mt-2" for="STATE_NAME" style="display:none"></label>
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label><strong>Country</strong><span class="mantSpan"> *</span></label>
+                    @Html.DropDownListFor(m => m.STATE_CNTRY_CODE, new SelectList(HRMS.Models.DropDownList.GetCountries(), "id", "text"), new { @class = "form-control select2", @data_placeholder = "Select Country", @style = "width:100%" })
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-primary btnSave">Save</button>
+    <button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">Close</button>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $(".select2").select2({
+            allowClear: true,
+            dropdownParent: $('#stateModalLabel')
+        });
+
+        $("#frmState").validate({
+            rules: {
+                'STATE_CODE': {
+                    required: true
+                },
+                'STATE_NAME': {
+                    required: true
+                },
+                'STATE_CNTRY_CODE': {
+                    required: true
+                }
+            },
+            messages: {
+                'STATE_CODE': {
+                    required: 'State Code must be entered'
+                },
+                'STATE_NAME': {
+                    required: 'State Name must be entered'
+                },
+                'STATE_CNTRY_CODE': {
+                    required: 'Country must be selected'
+                }
+            },
+            errorPlacement: function (label, element) {
+                label.addClass('mt-2 text-danger');
+                label.insertAfter(element);
+            },
+            highlight: function (element, errorClass) {
+                $(element).parent().addClass('has-danger')
+                $(element).addClass('form-control-danger')
+            }, errorPlacement: function (label, element) {
+                if (element.parent('.input-group').length) {
+                    label.insertAfter(element.parent());
+                    label.addClass('mt-2 text-danger');
+                    // radio/checkbox?
+                } else if (element.hasClass('select2')) {
+                    label.insertAfter(element.next('span'));
+                    label.addClass('mt-2 text-danger');
+                    // select2
+                } else {
+                    label.insertAfter(element);
+                    label.addClass('mt-2 text-danger');
+                    // default
+                }
+            }
+        });
+
+        $("#STATE_CODE").blur(function () {
+            CheckStateCodeExists();
+        });
+
+        function CheckStateCodeExists() {
+            if ('@Model.STATE_CRE_BY' == '') {
+                var inStateCode = $("#STATE_CODE").val();
+                var inStateCodeTrim = inStateCode.trim();
+                var inStateCodeLength = inStateCode.length;
+                if (inStateCodeLength > 0 && inStateCodeTrim == "") {
+                    $("#STATE_CODE_Error").css('display', 'block').text('State Code must be entered');
+                    $("#STATE_CODE").val(inStateCodeTrim);
+                }
+                else {
+                    if (inStateCodeTrim != "") {
+                        var parm = { "inStateCode": inStateCodeTrim };
+                        $.getJSON("/CityStateCountry/CheckStateCodeExists", parm,
+                            function (data) {
+                                if (data == true) {
+                                    $("#STATE_CODE_Error").css('display', 'block').text('State Code Already Exists');
+                                    $("#STATE_CODE").val(inStateCodeTrim);
+                                }
+                                else {
+                                    $("#STATE_CODE_Error").css('display', 'none').text('');
+                                }
+                            });
+                    }
+                }
+            }
+        }
+
+        $("#STATE_NAME").blur(function () {
+            CheckStateNameExists();
+        });
+
+        function CheckStateNameExists() {
+            var inStateName = $("#STATE_NAME").val();
+            var inStateNameTrim = inStateName.trim();
+            var inStateNameLength = inStateName.length;
+            if (inStateNameLength > 0 && inStateNameTrim == "") {
+                $("#STATE_NAME_Error").css('display', 'block').text('State Name must be entered');
+                $("#STATE_NAME").val(inStateNameTrim);
+            }
+            else {
+                if (inStateNameTrim != "") {
+                    var inStateCode = '@Model.STATE_CODE';
+                    var inCreBy = '@Model.STATE_CRE_BY';
+                    var parm = { "inStateName": inStateNameTrim, "inStateCode": inStateCode, "inCreBy": inCreBy };
+                    $.getJSON("/CityStateCountry/CheckStateNameExists", parm,
+                        function (data) {
+                            if (data == true) {
+                                $("#STATE_NAME_Error").css('display', 'block').text('State Name Already Exists');
+                                $("#STATE_NAME").val(inStateNameTrim);
+                            }
+                            else {
+                                $("#STATE_NAME_Error").css('display', 'none').text('');
+                            }
+                        });
+                }
+            }
+        }
+
+        $('.btnSave').on('click', function () {
+            $.ajaxSetup({
+                async: false
+            });
+
+            if ($("#frmState").valid()) {
+                CheckStateCodeExists();
+                CheckStateNameExists();
+                var error = $('.error').text();
+                if (error == "") {
+                    $("#frmState").submit();
+                }
+            }
+        });
+    });
+</script>

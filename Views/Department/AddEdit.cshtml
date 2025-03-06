@@ -1,0 +1,174 @@
+﻿@model HRMS.Models.DEPARTMENT
+@{
+    Layout = null;
+    if (Model.DEPT_CRE_BY == null)
+    {
+        ViewBag.Title = "Department - Add New";
+    }
+    else
+    {
+        ViewBag.Title = "Department - Edit";
+    }
+}
+
+<div class="modal-header">
+    <h5 class="modal-title" id="departmentModalLabel">@ViewBag.Title</h5>
+    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><i class="bi bi-x"></i></button>
+</div>
+<div class="modal-body">
+    @using (Html.BeginForm("Save", "Department", FormMethod.Post, new { @id = "frmDepartment" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(h => h.DEPT_CRE_BY)
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label><strong>Department Code</strong><span class="mantSpan"> *</span></label>
+                    @if (Model.DEPT_CRE_BY == null)
+                    {
+                        @Html.TextBoxFor(m => m.DEPT_CODE, new { @class = "form-control", @maxlength = "10", @placeholder = "Enter Department Code", @autocomplete = "off", @onkeypress = "return /[A-Za-z.&]/.test(event.key)" })
+                    }
+                    else
+                    {
+                        @Html.TextBoxFor(m => m.DEPT_CODE, new { @class = "form-control", @disabled = "disabled" })
+                        @Html.HiddenFor(h => h.DEPT_CODE)
+                    }
+                    <label id="DEPT_CODE_Error" class="error text-danger mt-2" for="DEPT_CODE" style="display:none"></label>
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label><strong>Department Name</strong><span class="mantSpan"> *</span></label>
+                    @Html.TextBoxFor(m => m.DEPT_NAME, new { @class = "form-control", @maxlength = "30", @placeholder = "Enter Department Name", @autocomplete = "off", @onkeypress = "return /[A-Za-z ]/.test(event.key)" })
+                    <label id="DEPT_NAME_Error" class="error text-danger mt-2" for="DEPT_NAME" style="display:none"></label>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-primary btnSave">Save</button>
+    <button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">Close</button>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#frmDepartment").validate({
+            rules: {
+                'DEPT_CODE': {
+                    required: true
+                },
+                'DEPT_NAME': {
+                    required: true
+                }
+            },
+            messages: {
+                'DEPT_CODE': {
+                    required: 'Department Code must be entered'
+                },
+                'DEPT_NAME': {
+                    required: 'Department Name must be entered'
+                }
+            },
+            errorPlacement: function (label, element) {
+                label.addClass('mt-2 text-danger');
+                label.insertAfter(element);
+            },
+            highlight: function (element, errorClass) {
+                $(element).parent().addClass('has-danger')
+                $(element).addClass('form-control-danger')
+            }, errorPlacement: function (label, element) {
+                if (element.parent('.input-group').length) {
+                    label.insertAfter(element.parent());
+                    label.addClass('mt-2 text-danger');
+                    // radio/checkbox?
+                } else if (element.hasClass('select2')) {
+                    label.insertAfter(element.next('span'));
+                    label.addClass('mt-2 text-danger');
+                    // select2
+                } else {
+                    label.insertAfter(element);
+                    label.addClass('mt-2 text-danger');
+                    // default
+                }
+            }
+        });
+
+        $("#DEPT_CODE").blur(function () {
+            CheckDeptCodeExists();
+        });
+
+        function CheckDeptCodeExists() {
+            if ('@Model.DEPT_CRE_BY' == '') {
+                var inDeptCode = $("#DEPT_CODE").val();
+                var inDeptCodeTrim = inDeptCode.trim();
+                var inDeptCodeLength = inDeptCode.length;
+                if (inDeptCodeLength > 0 && inDeptCodeTrim == "") {
+                    $("#DEPT_CODE_Error").css('display', 'block').text('Department Code must be entered');
+                    $("#DEPT_CODE").val(inDeptCodeTrim);
+                }
+                else {
+                    if (inDeptCodeTrim != "") {
+                        var parm = { "inDeptCode": inDeptCodeTrim };
+                        $.getJSON("/Department/CheckDeptCodeExists", parm,
+                            function (data) {
+                                if (data == true) {
+                                    $("#DEPT_CODE_Error").css('display', 'block').text('Department Code Already Exists');
+                                    $("#DEPT_CODE").val(inDeptCodeTrim);
+                                }
+                                else {
+                                    $("#DEPT_CODE_Error").css('display', 'none').text('');
+                                }
+                            });
+                    }
+                }
+            }
+        }
+
+        $("#DEPT_NAME").blur(function () {
+            CheckDeptNameExists();
+        });
+
+        function CheckDeptNameExists() {
+            var inDeptName = $("#DEPT_NAME").val();
+            var inDeptNameTrim = inDeptName.trim();
+            var inDeptNameLength = inDeptName.length;
+            if (inDeptNameLength > 0 && inDeptNameTrim == "") {
+                $("#DEPT_NAME_Error").css('display', 'block').text('Department Name must be entered');
+                $("#DEPT_NAME").val(inDeptNameTrim);
+            }
+            else {
+                if (inDeptNameTrim != "") {
+                    var inDeptCode = '@Model.DEPT_CODE';
+                    var inCreBy = '@Model.DEPT_CRE_BY';
+                    var parm = { "inDeptName": inDeptNameTrim, "inDeptCode": inDeptCode, "inCreBy": inCreBy };
+                    $.getJSON("/Department/CheckDeptNameExists", parm,
+                        function (data) {
+                            if (data == true) {
+                                $("#DEPT_NAME_Error").css('display', 'block').text('Department Name Already Exists');
+                                $("#DEPT_NAME").val(inDeptNameTrim);
+                            }
+                            else {
+                                $("#DEPT_NAME_Error").css('display', 'none').text('');
+                            }
+                        });
+                }
+            }
+        }
+
+        $('.btnSave').on('click', function () {
+            $.ajaxSetup({
+                async: false
+            });
+
+            if ($("#frmDepartment").valid()) {
+                CheckDeptCodeExists();
+                CheckDeptNameExists();
+                var error = $('.error').text();
+                if (error == "") {
+                    $("#frmDepartment").submit();
+                }
+            }
+        });
+    });
+</script>

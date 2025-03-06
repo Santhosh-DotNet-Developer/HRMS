@@ -1,0 +1,589 @@
+﻿@model HRMS.Models.USER_CREATION
+@{
+    Layout = null;
+    if (Model.USER_ID == 0)
+    {
+        ViewBag.Title = "User Creation - Add New";
+    }
+    else
+    {
+        ViewBag.Title = "User Creation - Edit";
+    }
+    HRMS.Models.HRMSEntities db = new HRMS.Models.HRMSEntities();
+    Int16 BE = Convert.ToInt16(HttpContext.Current.Request.Cookies[Constant.BE].Value);
+    Int16 BU = Convert.ToInt16(HttpContext.Current.Request.Cookies[Constant.BU].Value);
+    string Role = HttpContext.Current.Request.Cookies[Constant.Role].Value.ToLower();
+    int inAdminRoleId = db.ROLEs.Where(w => w.ROLE_BE == BE && w.ROLE_BU == BU && w.ROLE_DESC.ToLower() == "admin").Select(s => s.ROLE_ID).Single();
+}
+
+<style>
+    .custom-switch {
+        height: 2em !important;
+        width: 3.5em !important;
+        border: 1px solid #e1e3ea !important;
+    }
+</style>
+
+<div class="modal-header">
+    <h5 class="modal-title" id="userModalLabel">@ViewBag.Title</h5>
+    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><i class="bi bi-x"></i></button>
+</div>
+
+<div class="modal-body">
+    @using (Html.BeginForm("Save", "UserCreation", FormMethod.Post, new { @id = "frmUserCreation" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(h => h.USER_ID)
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label><strong>Username</strong><span class="mantSpan"> *</span></label>
+                    @if (Model.USER_ID == 0)
+                    {
+                        @Html.TextBoxFor(m => m.USER_NAME, new { @class = "form-control", @maxlength = "20", @placeholder = "Enter Username", @autocomplete = "off" })
+                    }
+                    else
+                    {
+                        @Html.TextBoxFor(m => m.USER_NAME, new { @class = "form-control", @maxlength = "20", @placeholder = "Enter Username", @autocomplete = "off", @disabled = "disabled" })
+                    }
+                    <label id="USER_NAME_Error" class="error text-danger mt-2" for="USER_NAME" style="display:none"></label>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label><strong>Employee</strong><span class="mantSpan"> *</span></label>
+                    @if (Model.USER_ID == 0)
+                    {
+                        @Html.DropDownListFor(m => m.USER_EMP_CODE, new SelectList(HRMS.Models.DropDownList.GetEmployees(), "id", "text"), new { @class = "form-control select2", @data_placeholder = "Select Employee", @style = "width:100%" })
+                    }
+                    else
+                    {
+                        @Html.DropDownListFor(m => m.USER_EMP_CODE, new SelectList(HRMS.Models.DropDownList.GetEmployees(), "id", "text"), new { @class = "form-control select2", @data_placeholder = "Select Employee", @style = "width:100%", @disabled = "disabled" })
+                    }
+                    <label id="USER_EMP_CODE_Error" class="error text-danger mt-2" for="USER_EMP_CODE" style="display:none"></label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label><strong>Role</strong><span class="mantSpan"> *</span></label>
+                    @if (Model.USER_ID == 0)
+                    {
+                        @Html.DropDownListFor(m => m.USER_ROLE_ID, new SelectList(HRMS.Models.DropDownList.GetRoles(), "id", "text"), new { @class = "form-control select2", @data_placeholder = "Select Role", @style = "width:100%" })
+                    }
+                    else
+                    {
+                        @Html.DropDownListFor(m => m.USER_ROLE_ID, new SelectList(HRMS.Models.DropDownList.GetRoles(), "id", "text"), new { @class = "form-control select2", @data_placeholder = "Select Role", @style = "width:100%", @disabled = "disabled" }) 
+                    }
+                    <label id="USER_ROLE_ID_Error" class="error text-danger mt-2" for="USER_ROLE_ID" style="display:none"></label>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label><strong>Password</strong><span class="mantSpan"> *</span></label>
+                    @if (Model.USER_ID == 0)
+                    {
+                        @Html.TextBoxFor(m => m.USER_PSWD, new { @type = "password", @class = "form-control", @maxlength = "10", @placeholder = "Enter Password", @autocomplete = "off" })
+                    }
+                    else
+                    {
+                        if (Role == "admin")
+                        {
+                            <div class="form-group position-relative has-icon-right">
+                                @Html.TextBoxFor(m => m.USER_PSWD, new { @type = "password", @class = "form-control", @maxlength = "10", @placeholder = "Enter Password", @autocomplete = "off", @readonly = "readonly" })
+                                <div class="form-control-icon">
+                                    <span class="set-icon"><i class="bi bi-eye-slash"></i></span>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            @Html.TextBoxFor(m => m.USER_PSWD, new { @type = "password", @class = "form-control", @maxlength = "10", @placeholder = "Enter Password", @autocomplete = "off", @disabled = "disabled" })
+                        }
+                    }
+                    <label id="USER_PSWD_Error" class="error text-danger mt-2" for="USER_PSWD" style="display:none"></label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            @if (Model.USER_ID == 0)
+            {
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label><strong>Confirm Password</strong><span class="mantSpan"> *</span></label>
+                        @Html.TextBox("USER_CONFIRM_PSWD", null, new { @class = "form-control", @placeholder = "Enter Confirm Password", @autocomplete = "off" })
+                        <label id="USER_CONFIRM_PSWD_Error" class="error text-danger mt-2" for="USER_CONFIRM_PSWD" style="display:none"></label>
+                    </div>
+                </div>
+            }
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label><strong>Status</strong><span class="mantSpan"> *</span></label>
+                    <div class="form-check form-switch">
+                        @if (Model.USER_ID == 0)
+                        {
+                            @Html.CheckBoxFor(m => m.USER_STATUS, new { @class = "form-control form-check-input custom-switch" })
+                        }
+                        else
+                        {
+                            @Html.CheckBoxFor(m => m.USER_STATUS, new { @class = "form-control form-check-input custom-switch", @disabled = "disabled" })
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="modal-footer">
+    @if (Model.USER_ID == 0)
+    {
+        <button type="button" class="btn btn-primary btnSave">Save</button>
+    }
+    else
+    {
+        <button type="button" class="btn btn-secondary btnCP" data-bs-toggle="modal" data-bs-target="#passwordModalPopUp">Change Password</button>
+        if (inAdminRoleId != Model.USER_ROLE_ID)
+        {
+            <button type="button" class="btn btn-primary btnSave">Update</button>
+        }
+    }
+    <button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">Close</button>
+</div>
+
+<div class="modal fade" id="passwordModalPopUp" tabindex="-1" role="dialog" aria-labelledby="passwordModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="passwordModalLabel">Change Password</h4>
+                <button type="button" class="close" data-bs-target="#userModalPopUp" data-bs-toggle="modal" data-bs-dismiss="modal"><i class="bi bi-x"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-light-warning color-warning mt-2" style="padding:0.5rem">
+                    <i class="bi bi-exclamation-triangle"></i>&nbsp;
+                    If you have forgotten your old password, please contact the admin.
+                </div>
+                <div class="row mt-2">
+                    <div class="col-sm-4">
+                        <label>Old Password</label>
+                    </div>
+                    <div class="col-sm-8 form-group">
+                        @Html.TextBox("USER_OLD_PSWD", null, new { @class = "form-control", @maxlength = "10", @placeholder = "Enter Old Password", @autocomplete = "off" })
+                        <label id="USER_OLD_PSWD_Error" class="error text-danger" style="display:none"></label>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-sm-4">
+                        <label>New Password</label>
+                    </div>
+                    <div class="col-sm-8 form-group">
+                        @Html.TextBox("USER_NEW_PSWD", null, new { @class = "form-control", @maxlength = "10", @placeholder = "Enter New Password", @autocomplete = "off" })
+                        <label id="USER_NEW_PSWD_Error" class="error text-danger" style="display:none"></label>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-sm-4">
+                        <label>Confirm Password</label>
+                    </div>
+                    <div class="col-sm-8 form-group">
+                        @Html.TextBox("USER_NEW_CONFIRM_PSWD", null, new { @class = "form-control", @maxlength = "10", @placeholder = "Enter Confirm Password", @autocomplete = "off" })
+                        <label id="USER_NEW_CONFIRM_PSWD_Error" class="error text-danger" style="display:none"></label>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-sm-12 d-flex justify-content-center">
+                        <button type="button" class="btn btn-primary btnUpdate">Update</button>&nbsp;
+                        <button type="button" class="btn btn-light-secondary" data-bs-target="#userModalPopUp" data-bs-toggle="modal" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        var iconClick = false;
+        var userModalPopup = false;
+        $(document).on('shown.bs.modal', '#userModalPopUp', function (e) {
+            userModalPopup = false;
+            Validation();
+            $(".select2").select2({
+                allowClear: true,
+                dropdownParent: $('#userModalPopUp')
+            });
+
+            $('#USER_EMP_CODE').on('select2:open', function () {
+                $('input.select2-search__field').attr('placeholder', 'Search Employee');
+            });
+
+            $('#USER_ROLE_ID').on('select2:open', function () {
+                $('input.select2-search__field').attr('placeholder', 'Search Role');
+            });
+        });
+
+        $(document).on('hidden.bs.modal', '#passwordModalPopUp', function (e) {
+            $('.modal-backdrop').remove();
+            if (userModalPopup == false) {
+                $('#userModalPopUp').modal('show');
+            }
+        });
+
+        $(document).on('hidden.bs.modal', '#userModalPopUp', function () {
+            $("#frmUserCreation").validate().resetForm();
+            $("#frmUserCreation")[0].reset();
+        });
+
+        $(document).on('click', '.set-icon', function () {
+            if (iconClick == false) {
+                $('.set-icon i.bi-eye-slash').remove();
+                $('.set-icon').append('<i class="bi bi-eye"></i>');
+                $('#USER_PSWD').attr('type', 'text');
+                iconClick = true;
+            }
+            else {
+                $('.set-icon i.bi-eye').remove();
+                $('.set-icon').append('<i class="bi bi-eye-slash"></i>');
+                $('#USER_PSWD').attr('type', 'password');
+                iconClick = false;
+            }
+        });
+
+        function Validation() {
+            $("#frmUserCreation").validate({
+                rules: {
+                    'USER_NAME': {
+                        required: true
+                    },
+                    'USER_EMP_CODE': {
+                        required: true
+                    },
+                    'USER_ROLE_ID': {
+                        required: true
+                    },
+                    'USER_PSWD': {
+                        required: true
+                    },
+                    'USER_CONFIRM_PSWD': {
+                        required: true
+                    }
+                },
+                messages: {
+                    'USER_NAME': {
+                        required: 'Username must be entered'
+                    },
+                    'USER_EMP_CODE': {
+                        required: 'Employee must be selected'
+                    },
+                    'USER_ROLE_ID': {
+                        required: 'Role must be selected'
+                    },
+                    'USER_PSWD': {
+                        required: 'Password must be entered'
+                    },
+                    'USER_CONFIRM_PSWD': {
+                        required: 'Confirm Password must be entered'
+                    }
+                },
+                errorPlacement: function (label, element) {
+                    label.addClass('mt-2 text-danger');
+                    label.insertAfter(element);
+                },
+                highlight: function (element, errorClass) {
+                    $(element).parent().addClass('has-danger')
+                    $(element).addClass('form-control-danger')
+                }, errorPlacement: function (label, element) {
+                    if (element.parent('.input-group').length) {
+                        label.insertAfter(element.parent());
+                        label.addClass('mt-2 text-danger');
+                        // radio/checkbox?
+                    } else if (element.hasClass('select2')) {
+                        label.insertAfter(element.next('span'));
+                        label.addClass('mt-2 text-danger');
+                        // select2
+                    } else {
+                        label.insertAfter(element);
+                        label.addClass('mt-2 text-danger');
+                        // default
+                    }
+                }
+            });
+        }
+
+        $(document).on('blur', '#USER_NAME', function () {
+            CheckUsernameExists();
+        });
+
+        function CheckUsernameExists() {
+            if ('@Model.USER_ID' == 0) {
+                var inUsername = $("#USER_NAME").val();
+                var inUsernameTrim = inUsername.trim();
+                var inUsernameLength = inUsername.length;
+                if (inUsernameLength > 0 && inUsernameTrim == "") {
+                    $("#USER_NAME_Error").css('display', 'block').text('Username must be entered');
+                    $("#USER_NAME").val(inUsernameTrim);
+                }
+                else {
+                    if (inUsernameTrim != "") {
+                        var parm = { "inUsername": inUsernameTrim };
+                        $.getJSON("/UserCreation/CheckUsernameExists", parm,
+                            function (data) {
+                                if (data == true) {
+                                    $("#USER_NAME").val(inUsernameTrim);
+                                    $("#USER_NAME_Error").css('display', 'block').text('City Already Exists');
+                                }
+                                else {
+                                    $("#USER_NAME_Error").css('display', 'none').text('');
+                                }
+                            });
+                    }
+                }
+            }
+        }
+
+        $(document).on('change', '#USER_EMP_CODE', function () {
+            CheckEmployeeExists();
+        });
+
+        function CheckEmployeeExists() {
+            if ('@Model.USER_ID' == 0) {
+                var inEmployee = $("#USER_EMP_CODE").val();
+                if (inEmployee != "") {
+                    var parm = { "inEmpCode": inEmployee };
+                    $.getJSON("/UserCreation/CheckEmployeeExists", parm,
+                        function (data) {
+                            if (data == true) {
+                                $("#USER_EMP_CODE_Error").css('display', 'block').text('Employee Already Exists');
+                            }
+                            else {
+                                $("#USER_EMP_CODE_Error").css('display', 'none').text('');
+                            }
+                        });
+                }
+                else {
+                    $("#USER_EMP_CODE_Error").css('display', 'none').text('');
+                }
+            }
+        }
+
+        $(document).on('blur', '#USER_CONFIRM_PSWD', function () {
+            CheckConfirmPassword();
+        });
+
+        function CheckConfirmPassword() {
+            var inConfirmPassword = $("#USER_CONFIRM_PSWD").val();
+            var inConfirmPasswordTrim = inConfirmPassword.trim();
+            var inConfirmPasswordLength = inConfirmPassword.length;
+            if (inConfirmPasswordLength > 0 && inConfirmPasswordTrim == "") {
+                $("#USER_CONFIRM_PSWD_Error").css('display', 'block').text('Confirm Password must be entered');
+                $("#USER_CONFIRM_PSWD").val(inConfirmPasswordTrim);
+            }
+            else {
+                if (inConfirmPasswordTrim != "") {
+                    var inPassword = $("#USER_PSWD").val();
+                    var inPasswordTrim = inPassword.trim();
+                    if (inPasswordTrim != inConfirmPasswordTrim) {
+                        $("#USER_CONFIRM_PSWD").val(inConfirmPasswordTrim);
+                        $("#USER_CONFIRM_PSWD_Error").css('display', 'block').text('Password and Confirm Password do not match');
+                    }
+                    else {
+                        $("#USER_CONFIRM_PSWD_Error").css('display', 'none').text('');
+                    }
+                }
+            }
+        }
+
+        $(document).on('click', '.btnUpdate', function () {
+            $.ajaxSetup({
+                async: false
+            });
+
+            ChangePasswordVaildation();
+            CheckOldPassword();
+            CheckNewConfirmPassword();
+            var error = $('.error').text();
+            if (error == "") {
+                var inUserId = $('#USER_ID').val();
+                var inConfirmPassword = $("#USER_NEW_CONFIRM_PSWD").val();
+                var inConfirmPasswordTrim = inConfirmPassword.trim();
+                $.ajax({
+                    type: 'GET',
+                    url: '/UserCreation/UpdatePassword?inUserId=' + inUserId + "&inNewPassword=" + inConfirmPassword,
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    async: false,
+                    success: function (data) {
+                        if (data == true) {
+                            swal({
+                                title: "Success",
+                                text: '<span style="color:black"><span>Password Updated Successfully',
+                                type: "success",
+                                html: true
+                            },
+                            function (result) {
+                                if (result) {
+                                    userModalPopup = true;
+                                    $('#passwordModalPopUp').modal('hide');
+                                    $('#userModalPopUp').modal('hide');
+                                }
+                            });
+                        }
+                        else {
+                            swal({
+                                title: "Exception",
+                                text: '<span style="color:black"><span> ' + data + '',
+                                type: "error",
+                                html: true
+                            });
+                        }
+                    },
+                });
+            }
+        });
+
+        function ChangePasswordVaildation() {
+            var inOldPassword = $("#USER_OLD_PSWD").val();
+            var inOldPasswordTrim = inOldPassword.trim();
+            if (inOldPasswordTrim == "") {
+                $("#USER_OLD_PSWD_Error").css('display', 'block').text('Old Password must be entered');
+                $("#USER_OLD_PSWD").val(inOldPasswordTrim);
+            }
+            else {
+                $("#USER_OLD_PSWD_Error").css('display', 'none').text('');
+            }
+
+            var inNewPassword = $("#USER_NEW_PSWD").val();
+            var inNewPasswordTrim = inNewPassword.trim();
+            if (inNewPasswordTrim == "") {
+                $("#USER_NEW_PSWD_Error").css('display', 'block').text('New Password must be entered');
+                $("#USER_NEW_PSWD").val(inNewPasswordTrim);
+            }
+            else {
+                $("#USER_NEW_PSWD_Error").css('display', 'none').text('');
+            }
+
+            var inConfirmPassword = $("#USER_NEW_CONFIRM_PSWD").val();
+            var inConfirmPasswordTrim = inConfirmPassword.trim();
+            if (inConfirmPasswordTrim == "") {
+                $("#USER_NEW_CONFIRM_PSWD_Error").css('display', 'block').text('Confirm Password must be entered');
+                $("#USER_NEW_CONFIRM_PSWD").val(inOldPasswordTrim);
+            }
+            else {
+                $("#USER_OLD_PSWD_Error").css('display', 'none').text('');
+            }
+        }
+
+        $(document).on('blur', '#USER_OLD_PSWD', function () {
+            CheckOldPassword();
+        });
+
+        function CheckOldPassword() {
+            var inOldPassword = $('#USER_PSWD').val();
+            var checkOldPassword = $("#USER_OLD_PSWD").val();
+            var checkOldPasswordTrim = checkOldPassword.trim();
+            if (checkOldPasswordTrim == "") {
+                $("#USER_OLD_PSWD_Error").css('display', 'block').text('Old Password must be entered');
+                $("#USER_OLD_PSWD").val(checkOldPasswordTrim);
+            }
+            else {
+                if (inOldPassword != checkOldPasswordTrim) {
+                    $("#USER_OLD_PSWD_Error").css('display', 'block').text('Old Password do not match');
+                }
+                else {
+                    $("#USER_OLD_PSWD_Error").css('display', 'none').text('');
+                }
+            }
+        }
+
+        $(document).on('blur', '#USER_NEW_PSWD', function () {
+            CheckNewPassword();
+        });
+
+        $(document).on('blur', '#USER_NEW_CONFIRM_PSWD', function () {
+            CheckNewConfirmPassword();
+        });
+
+        function CheckNewPassword() {
+            var inNewPassword = $("#USER_NEW_PSWD").val();
+            var inNewPasswordTrim = inNewPassword.trim();
+            if (inNewPasswordTrim == "") {
+                $("#USER_NEW_PSWD_Error").css('display', 'block').text('New Password must be entered');
+                $("#USER_NEW_PSWD").val(inNewPasswordTrim);
+            }
+            else {
+                $("#USER_NEW_PSWD_Error").css('display', 'none').text('');
+            }
+        }
+
+        function CheckNewConfirmPassword() {
+            var inNewPassword = $("#USER_NEW_PSWD").val();
+            var inNewPasswordTrim = inNewPassword.trim();
+            var inNewConfirmPassword = $("#USER_NEW_CONFIRM_PSWD").val();
+            var inNewConfirmPasswordTrim = inNewConfirmPassword.trim();
+            if (inNewConfirmPasswordTrim == "") {
+                $("#USER_NEW_CONFIRM_PSWD_Error").css('display', 'block').text('Confirm Password must be entered');
+                $("#USER_NEW_CONFIRM_PSWD").val(inNewConfirmPasswordTrim);
+            }
+            else {
+                if (inNewPasswordTrim != inNewConfirmPasswordTrim) {
+                    $("#USER_NEW_CONFIRM_PSWD_Error").css('display', 'block').text('New Password and Confirm Password do not match');
+                }
+                else {
+                    $("#USER_NEW_CONFIRM_PSWD_Error").css('display', 'none').text('');
+                }
+            }
+        }
+
+        $(document).on('click', '.btnCP', function () {
+            $("#USER_OLD_PSWD").val("");
+            $("#USER_NEW_PSWD").val("");
+            $("#USER_NEW_CONFIRM_PSWD").val("");
+            $("#USER_OLD_PSWD_Error").css('display', 'none').text('');
+            $("#USER_NEW_PSWD_Error").css('display', 'none').text('');
+            $("#USER_NEW_CONFIRM_PSWD_Error").css('display', 'none').text('');
+        });
+
+        $(document).on('input', '#USER_OLD_PSWD', function () {
+            var inOldPassword = $("#USER_OLD_PSWD").val();
+            var inOldPasswordTrim = inOldPassword.trim();
+            if (inOldPasswordTrim != "") {
+                $("#USER_OLD_PSWD_Error").css('display', 'none').text('');
+            }
+        });
+
+        $(document).on('input', '#USER_NEW_PSWD', function () {
+            var inNewPassword = $("#USER_NEW_PSWD").val();
+            var inNewPasswordTrim = inNewPassword.trim();
+            if (inNewPasswordTrim != "") {
+                $("#USER_NEW_PSWD_Error").css('display', 'none').text('');
+            }
+        });
+
+        $(document).on('input', '#USER_NEW_CONFIRM_PSWD', function () {
+            var inNewConfirmPassword = $("#USER_NEW_CONFIRM_PSWD").val();
+            var inNewConfirmPasswordTrim = inNewConfirmPassword.trim();
+            if (inNewConfirmPasswordTrim != "") {
+                $("#USER_NEW_CONFIRM_PSWD_Error").css('display', 'none').text('');
+            }
+        });
+
+        $(document).on('click', '.btnSave', function () {
+            $.ajaxSetup({
+                async: false
+            });
+
+            if ($("#frmUserCreation").valid()) {
+                CheckUsernameExists();
+                CheckEmployeeExists();
+                var error = $('.error').text();
+                if (error == "") {
+                    $("#frmUserCreation").submit();
+                }
+            }
+            else {
+                CheckConfirmPassword();
+            }
+        });
+    });
+</script>

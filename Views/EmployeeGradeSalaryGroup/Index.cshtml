@@ -1,0 +1,143 @@
+﻿@model Tuple<List<HRMS.Models.EMPLOYEE_GRADE>, List<HRMS.Models.SALARY_GROUP>>
+@{
+    ViewBag.Title = "Employee Grade/Salary Group";
+    ViewBag.Parent = "Configuration";
+    var curTab = ViewBag.CurTab;
+}
+
+<div id="main-content">
+    <div class="page-heading">
+        <div class="page-title">
+            <div class="row">
+                <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="~/Home/Index">Home</a></li>
+                        <li class="breadcrumb-item">@ViewBag.Parent</li>
+                        <li class="breadcrumb-item active">@ViewBag.Title</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <section class="section">
+            <div class="card">
+                <div class="card-body">
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link active" id="empGrade-tab" data-bs-toggle="tab" href="#empGrade" role="tab" aria-controls="empGrade" aria-selected="true">Employee Grade</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="salaryGrp-tab" data-bs-toggle="tab" href="#salaryGrp" role="tab" aria-controls="salaryGrp" aria-selected="false">Salary Group</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="myTabContent">
+                        <div class="tab-pane fade show active" id="empGrade" role="tabpanel" aria-labelledby="empGrade-tab">
+                            <div class="card">
+                                <div class="card-header">
+                                    <a href="~/EmployeeGradeSalaryGroup/AddEditEmpGrade?inEmpGradeCode=" data-bs-toggle="modal" data-bs-target="#empGradeModalPopUp" class="btn btn-primary float-end">Add Grade</a>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-hover" id="datatable">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width:10%">S. No.</th>
+                                                        <th style="width:20%">Code</th>
+                                                        <th style="width:30%">Grade</th>
+                                                        <th style="width:30%">Salary Group</th>
+                                                        <th style="width:10%">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @{int i = 0;}
+                                                    @foreach (var empGrade in Model.Item1)
+                                                    {
+                                                        <tr>
+                                                            <td style="width:10%">@(i = i + 1)</td>
+                                                            <td style="width:20%">@empGrade.EG_CODE</td>
+                                                            <td style="width:30%">@empGrade.EG_NAME</td>
+                                                            <td style="width:30%">@HRMS.Models.DropDownList.GetSalaryGroupName(empGrade.EG_SAL_GRP_CODE)</td>
+                                                            <td style="width:10%" class="text-center">
+                                                                <a href="~/EmployeeGradeSalaryGroup/AddEditEmpGrade?inEmpGradeCode=@empGrade.EG_CODE" class="edit" data-bs-toggle="modal" data-bs-target="#empGradeModalPopUp" title="Edit"><i class="bi bi-pencil-square"></i></a>
+                                                                <a href="~/EmployeeGradeSalaryGroup/DeleteEmployeeGrade?inEmpGradeCode=@empGrade.EG_CODE" title="Delete" class="delete"><i class="bi bi-trash"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="salaryGrp" role="tabpanel" aria-labelledby="salaryGrp-tab">
+                            <div class="card">
+                                <div class="card-header">
+                                    <a href="~/EmployeeGradeSalaryGroup/AddEditSalaryGrp?inSalaryGrpCode=" data-bs-toggle="modal" data-bs-target="#salaryGrpModalPopUp" class="btn btn-primary float-end">Add Group</a>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-hover" id="datatable1">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width:10%">S. No.</th>
+                                                        <th style="width:15%">Code</th>
+                                                        <th style="width:65%">Salary Group</th>
+                                                        <th style="width:10%">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @{int j = 0;}
+                                                    @foreach (var salaryGrp in Model.Item2)
+                                                    {
+                                                        <tr>
+                                                            <td style="width:10%">@(j = j + 1)</td>
+                                                            <td style="width:15%">@salaryGrp.SG_CODE</td>
+                                                            <td style="width:65%">@salaryGrp.SG_NAME</td>
+                                                            <td style="width:10%" class="text-center">
+                                                                <a href="~/EmployeeGradeSalaryGroup/AddEditSalaryGrp?inSalaryGrpCode=@salaryGrp.SG_CODE" data-bs-toggle="modal" data-bs-target="#salaryGrpModalPopUp" class="edit"><i class="bi bi-pencil-square"></i></a>
+                                                                <a href="~/EmployeeGradeSalaryGroup/DeleteSalaryGroup?inSalaryGrpCode=@salaryGrp.SG_CODE" title="Delete" class="delete"><i class="bi bi-trash"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<div class="modal fade text-start" id="empGradeModalPopUp" tabindex="-1" aria-labelledby="empGradeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+
+<div class="modal fade text-start" id="salaryGrpModalPopUp" tabindex="-1" aria-labelledby="salaryGrpModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#loading").hide();
+
+        if ('@curTab' == "SalaryGrp") {
+            $('#salaryGrp-tab').tab('show');
+        }
+        else {
+            $('#empGrade-tab').tab('show');
+        }
+    });
+</script>

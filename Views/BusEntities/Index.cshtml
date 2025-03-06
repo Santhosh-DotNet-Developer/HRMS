@@ -1,0 +1,559 @@
+﻿@model Tuple<HRMS.Models.BUS_ENTITIES, List<HRMS.Models.BUS_UNITS>, List<HRMS.Models.BUS_BRANCH>>
+@{
+    ViewBag.Title = "Bus Entities";
+    ViewBag.Parent = "Configuration";
+    var curTab = ViewBag.CurTab;
+}
+
+<div id="main-content">
+    <div class="page-heading">
+        <div class="page-title">
+            <div class="row">
+                <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="~/Home/Index">Home</a></li>
+                        <li class="breadcrumb-item">@ViewBag.Parent</li>
+                        <li class="breadcrumb-item active">@ViewBag.Title</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <section class="section">
+            <div class="card">
+                <div class="card-body">
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link active" id="BE-tab" data-bs-toggle="tab" href="#entity" role="tab" aria-controls="entity" aria-selected="true">Business Entity</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="BU-tab" data-bs-toggle="tab" href="#unit" role="tab" aria-controls="unit" aria-selected="false">Business Units</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="Branch-tab" data-bs-toggle="tab" href="#branch" role="tab" aria-controls="branch" aria-selected="false">Business Branch</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="myTabContent">
+                        <div class="tab-pane fade show active" id="entity" role="tabpanel" aria-labelledby="BE-tab">
+                            @using (Html.BeginForm("SaveEntity", "BusEntities", FormMethod.Post, new { @id = "frmBusEntities", enctype = "multipart/form-data" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                @Html.HiddenFor(h => h.Item1.BE_ID)
+                                <div class="row mt-3">
+                                    <div class="col-sm-9">
+                                        <div class="row">
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="form-control-label"><strong>Name</strong><span class="mantSpan"> *</span></label>
+                                                    @Html.TextBoxFor(m => m.Item1.BE_NAME, new { @class = "form-control", @maxlength = "50", @placeholder = "Enter Name", @autocomplete = "off", @onkeypress = "return /[A-Za-z0-9 ]/.test(event.key)" })
+                                                    <label id="BE_NAME_Error" class="error text-danger mt-2" for="Item1_BE_NAME" style="display:none"></label>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="form-control-label"><strong>Mobile No.</strong><span class="mantSpan"> *</span></label>
+                                                    @Html.TextBoxFor(m => m.Item1.BE_MOB_NO, new { @class = "form-control", @maxlength = "15", @placeholder = "Enter Mobile No.", @autocomplete = "off", @onkeypress = "return /[0-9 +-]/i.test(event.key)" })
+                                                    <label id="BE_MOB_NO_Error" class="error text-danger mt-2" for="Item1_BE_MOB_NO" style="display:none"></label>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="form-control-label"><strong>Alternate Mobile No.</strong></label>
+                                                    @Html.TextBoxFor(m => m.Item1.BE_ALT_MOB_NO, new { @class = "form-control", @maxlength = "15", @placeholder = "Enter Alternate Mobile No.", @autocomplete = "off", @onkeypress = "return /[0-9 +-]/i.test(event.key)" })
+                                                    <label id="BE_ALT_MOB_NO_Error" class="error text-danger mt-2" style="display:none"></label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="form-control-label"><strong>Email ID</strong><span class="mantSpan"> *</span></label>
+                                                    @Html.TextBoxFor(m => m.Item1.BE_EMAIL, new { @class = "form-control", @maxlength = "50", @autocomplete = "off", @placeholder = "Enter Email ID" })
+                                                    <label id="BE_EMAIL_Error" class="error text-danger mt-2" for="Item1_BE_EMAIL" style="display:none"></label>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="form-control-label"><strong>Website</strong><span class="mantSpan"> *</span></label>
+                                                    @Html.TextBoxFor(m => m.Item1.BE_WEBSITE, new { @class = "form-control", @maxlength = "100", @autocomplete = "off", @placeholder = "Enter Website", @onkeypress = "return /[A-Za-z0-9$-_.+!*'();/?:@=&]/.test(event.key)" })
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="form-control-label"><strong>GSTIN</strong><span class="mantSpan"> *</span></label>
+                                                    @Html.TextBoxFor(m => m.Item1.BE_GSTIN, new { @class = "form-control", @maxlength = "15", @placeholder = "Enter GSTIN", @autocomplete = "off", @onkeypress = "return /[A-Za-z0-9]/.test(event.key)" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="form-control-label"><strong>City</strong><span class="mantSpan"> *</span></label>
+                                                    @Html.DropDownListFor(m => m.Item1.BE_CITY_ID, new SelectList(HRMS.Models.DropDownList.GetCities(), "id", "text"), new { @class = "form-control select2", data_placeholder = "Select City", @style = "width:100%" })
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="form-control-label"><strong>State</strong><span class="mantSpan"> *</span></label>
+                                                    @Html.DropDownListFor(m => m.Item1.BE_STATE_CODE, new SelectList(HRMS.Models.DropDownList.GetStates(), "id", "text"), new { @class = "form-control select2", data_placeholder = "Select State", @style = "width:100%", @disabled = "disabled" })
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="form-control-label"><strong>Country</strong><span class="mantSpan"> *</span></label>
+                                                    @Html.DropDownListFor(m => m.Item1.BE_CNTRY_CODE, new SelectList(HRMS.Models.DropDownList.GetCountries(), "id", "text"), new { @class = "form-control select2", data_placeholder = "Select Country", @style = "width:100%", @disabled = "disabled" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-8">
+                                                <div class="form-group">
+                                                    <label class="form-control-label"><strong>Address</strong> <span class="mantSpan"> *</span></label>
+                                                    @Html.TextAreaFor(m => m.Item1.BE_ADDRESS, new { @class = "form-control", @maxlength = "100", @placeholder = "Enter Address", @autocomplete = "off" })
+                                                    <label id="BE_ADDRESS_Error" class="error text-danger mt-2" for="Item1_BE_ADDRESS" style="display:none"></label>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="form-control-label"><strong>Pincode</strong><span class="mantSpan"> *</span></label>
+                                                    @Html.TextBoxFor(m => m.Item1.BE_PINCODE, new { @class = "form-control", @maxlength = "6", @placeholder = "Enter Pincode", @autocomplete = "off", @onkeypress = "return /[0-9]/.test(event.key)" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="row">
+                                            @if (String.IsNullOrEmpty(Model.Item1.BE_LOGO_URL))
+                                            {
+                                                <img src="~/Content/images/logo/NoImage.jpg" id="image-div" height="200" width="215" onerror="this.src = '/Content/images/NoImage.jpg'">
+                                            }
+                                            else
+                                            {
+                                                <img src="../../@Model.Item1.BE_LOGO_URL" id="image-div" height="200" width="215" onerror="this.src = '/Content/images/NoImage.jpg'">
+                                            }
+                                            @Html.HiddenFor(m => m.Item1.BE_LOGO_URL)
+                                        </div>
+                                        <div class="text-center mt-3">
+                                            <label title="Upload Photo" for="file" class="btn btn-secondary">Upload <i class="bi bi-upload custom-icon"></i></label>
+                                            <button type="button" id="clear" class="btn btn-light-secondary">Clear <i class="bi bi-eraser custom-icon"></i></button>
+                                            <input type="file" accept="image/*" id="file" name="file" style='visibility: hidden;font-size:small'>
+                                            <label id="BE_LOGO_URL_Error" class="error text-danger mt-2" style="display:none"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="float-end">
+                                    <button type="button" name="btnSave" id="btnSave" class="btn btn-primary">Update <i class="bi bi-check2-circle custom-icon"></i></button>
+                                    <a name="btnClose" class="btn btn-light-secondary" href="~/Dashboard/Index">Close <i class="bi bi-arrow-right-circle custom-icon"></i></a>
+                                </div>
+                            }
+                        </div>
+                        <div class="tab-pane fade" id="unit" role="tabpanel" aria-labelledby="BU-tab">
+                            <div class="card">
+                                <div class="card-header">
+                                    <a href="~/BusEntities/AddUnit?unitId=0" data-bs-toggle="modal" data-bs-target="#unitModalPopUp" class="btn btn-primary float-end">Add Unit</a>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-hover" id="datatable">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width:10%">S. No.</th>
+                                                        <th style="width:20%">Unit Name</th>
+                                                        <th style="width:30%">Address</th>
+                                                        <th style="width:15%">City</th>
+                                                        <th style="width:15%">Mobile No.</th>
+                                                        <th style="width:10%">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @{int i = 0;}
+                                                    @foreach (var data in Model.Item2)
+                                                    {
+                                                        <tr>
+                                                            <td style="width:10%">@(i = i + 1)</td>
+                                                            <td style="width:20%">@data.BU_NAME</td>
+                                                            <td style="width:30%">@data.BU_ADDRESS</td>
+                                                            <td style="width:15%">@data.CITy.CITY_NAME</td>
+                                                            <td style="width:15%">@data.BU_MOB_NO</td>
+                                                            <td style="width:10%" class="text-center">
+                                                                <a href="~/BusEntities/AddUnit?unitId=@data.BU_ID" class="edit" data-bs-toggle="modal" data-bs-target="#unitModalPopUp" title="Edit"><i class="bi bi-pencil-square"></i></a>
+                                                                <a href="~/City/Delete?unitId=@data.BU_ID" title="Delete" class="delete"><i class="bi bi-trash"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="branch" class="tab-pane fade" role="tabpanel" aria-labelledby="Branch-tab">
+                            <div class="card">
+                                <div class="card-header">
+                                    <a href="~/BusEntities/AddBranch?inBranchId=0" data-bs-toggle="modal" data-bs-target="#branchModalPopUp" class="btn btn-primary float-end">Add Branch</a>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-hover" id="datatable1">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width:10%">S. No.</th>
+                                                        <th style="width:20%">Branch Name</th>
+                                                        <th style="width:30%">Address</th>
+                                                        <th style="width:15%">City</th>
+                                                        <th style="width:15%">Mobile No.</th>
+                                                        <th style="width:10%">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @{int j = 0;}
+                                                    @foreach (var data in Model.Item3)
+                                                    {
+                                                        <tr>
+                                                            <td style="width:10%">@(j = j + 1)</td>
+                                                            <td style="width:20%">@data.BR_NAME</td>
+                                                            <td style="width:30%">@data.BR_ADDR</td>
+                                                            <td style="width:15%">@HRMS.Models.DropDownList.GetCityName(data.BR_CITY_ID.GetValueOrDefault())</td>
+                                                            <td style="width:15%">@data.BR_MOB_NO</td>
+                                                            <td style="width:10%" class="text-center">
+                                                                <a href="~/BusEntities/AddBranch?inBranchId=@data.BR_ID" data-bs-toggle="modal" data-bs-target="#branchModalPopUp" class="edit"><i class="bi bi-pencil-square"></i></a>
+                                                                <a href="~/City/Delete?inBranchId=@data.BR_ID" title="Delete" class="delete"><i class="bi bi-trash"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<div class="modal fade text-start" id="unitModalPopUp" tabindex="-1" aria-labelledby="unitModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+
+<div class="modal fade text-start" id="branchModalPopUp" tabindex="-1" aria-labelledby="branchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#loading").hide();
+
+        $(".select2").select2({
+            allowClear: true,
+        });
+
+        $('.select2').on('select2:open', function () {
+            $('input.select2-search__field').attr('placeholder', 'Search City');
+        });
+
+        if ('@curTab' == "Branch") {
+            $('#Branch-tab').tab('show');
+        }
+        else if ('@curTab' == "Unit") {
+            $('#BU-tab').tab('show');
+        }
+        else {
+            $('#BE-tab').tab('show');
+        }
+
+        $("#frmBusEntities").validate({
+            ignore: 'input[type=hidden]',
+            rules: {
+                'Item1.BE_NAME': {
+                    required: true
+                },
+                'Item1.BE_MOB_NO': {
+                    required: true
+                },
+                'Item1.BE_EMAIL': {
+                    required: true
+                },
+                'Item1.BE_WEBSITE': {
+                    required: true
+                },
+                'Item1.BE_GSTIN': {
+                    required: true
+                },
+                'Item1.BE_CITY_ID': {
+                    required: true
+                },
+                'Item1.BE_ADDRESS': {
+                    required: true
+                },
+                'Item1.BE_PINCODE': {
+                    required: true
+                }
+            },
+            messages: {
+                'Item1.BE_NAME': {
+                    required: 'Name must be entered'
+                },
+                'Item1.BE_MOB_NO': {
+                    required: 'Mobile No. must be entered'
+                },
+                'Item1.BE_EMAIL': {
+                    required: 'Email ID must be entered'
+                },
+                'Item1.BE_WEBSITE': {
+                    required: 'Website must be entered'
+                },
+                'Item1.BE_GSTIN': {
+                    required: 'GSTIN must be entered'
+                },
+                'Item1.BE_CITY_ID': {
+                    required: 'City must be selected'
+                },
+                'Item1.BE_ADDRESS': {
+                    required: 'Address must be entered'
+                },
+                'Item1.BE_PINCODE': {
+                    required: 'Pincode must be entered'
+                }
+            },
+            errorPlacement: function (label, element) {
+                label.addClass('mt-2 text-danger');
+                label.insertAfter(element);
+            },
+            highlight: function (element, errorClass) {
+                $(element).parent().addClass('has-danger')
+                $(element).addClass('form-control-danger')
+            }, errorPlacement: function (label, element) {
+                if (element.parent('.input-group').length) {
+                    label.insertAfter(element.parent());
+                    label.addClass('mt-2 text-danger');
+                    // radio/checkbox?
+                } else if (element.hasClass('select2')) {
+                    label.insertAfter(element.next('span'));
+                    label.addClass('mt-2 text-danger');
+                    // select2
+                } else {
+                    label.insertAfter(element);
+                    label.addClass('mt-2 text-danger');
+                    // default
+                }
+            }
+        });
+
+        $("#Item1_BE_NAME").blur(function () {
+            CheckEntityNameExists();
+        });
+
+        function CheckEntityNameExists() {
+            var inEntityName = $("#Item1_BE_NAME").val();
+            var inEntityNameTrim = inEntityName.trim();
+            var inEntityNameLength = inEntityName.length;
+            if (inEntityNameLength > 0 && inEntityNameTrim == "") {
+                $("#BE_NAME_Error").css('display', 'block').text('Name must be entered');
+                $("#Item1_BE_NAME").val(inEntityNameTrim);
+            }
+            else {
+                if (inEntityNameTrim != "") {
+                    $("#BE_NAME_Error").css('display', 'block').text('');
+                    $("#Item1_BE_NAME").val(inEntityNameTrim);
+                }
+            }
+        }
+
+        $('#Item1_BE_MOB_NO').blur(function () {
+            var mobNo = $('#Item1_BE_MOB_NO').val();
+            CheckMobileNoValidation(mobNo, 'M');
+        });
+
+        $('#Item1_BE_ALT_MOB_NO').blur(function () {
+            var altMobNo = $('#Item1_BE_ALT_MOB_NO').val();
+            CheckMobileNoValidation(altMobNo, 'AM');
+        });
+
+        function CheckMobileNoValidation(number, type) {
+            var inMobileNo = number;
+            var inMobileNoTrim = inMobileNo.trim();
+            var inMobileNoLength = inMobileNo.length;
+            if (inMobileNoLength > 0 && inMobileNoTrim == "") {
+                if (type == "M") {
+                    $('#BE_MOB_NO_Error').css('display', 'block').text("Mobile No. must be entered");
+                    $("#Item1_BE_MOB_NO").val(inMobileNoTrim);
+                }
+                else {
+                    $("#Item1_BE_ALT_MOB_NO").val(inMobileNoTrim);
+                }
+            }
+            else {
+                if (inMobileNoTrim != "") {
+                    var regex = /^(\+91[-\s]?([-][\s]?)?|0091[-\s]?([-][\s]?)?|091[-\s]?([-][\s]?)?|91[-\s]?([-][\s]?)?|0)?[6-9]\d{4}[-\s]?\d{5}$/;
+                    if (regex.test(inMobileNoTrim)) {
+                        if (type == "M") {
+                            $('#BE_MOB_NO_Error').css('display', 'none').text("");
+                            $("#Item1_BE_MOB_NO").val(inMobileNoTrim);
+                        }
+                        else {
+                            $('#BE_ALT_MOB_NO_Error').css('display', 'none').text("");
+                            $("#Item1_BE_ALT_MOB_NO").val(inMobileNoTrim);
+                        }
+                    }
+                    else {
+                        if (type == "M") {
+                            $('#BE_MOB_NO_Error').css('display', 'block').text("Please enter valid Mobile No.");
+                            $("#Item1_BE_MOB_NO").val(inMobileNoTrim);
+                        }
+                        else {
+                            $('#BE_ALT_MOB_NO_Error').css('display', 'block').text("Please enter valid Alternate Mobile No.");
+                            $("#Item1_BE_ALT_MOB_NO").val(inMobileNoTrim);
+                        }
+                    }
+                }
+                else {
+                    $('#BE_ALT_MOB_NO_Error').css('display', 'none').text("");
+                    $("#Item1_BE_ALT_MOB_NO").val(inMobileNoTrim);
+                }
+            }
+        }
+
+        function readFileURL(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#image-div').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+            else {
+                $("#image-div").attr("src", '/Content/images/logo/NoImage.jpg');
+            }
+        }
+
+        $("#clear").click(function () {
+            $('#image-div').attr('src', '/Content/images/logo/NoImage.jpg');
+            $("#Item1_BE_LOGO_URL").val("");
+            $("#image-div").val('');
+            $("#file").val('');
+            $("#BE_LOGO_URL_error").css('display', 'none').text("");
+        });
+
+        $("#file").change(function () {
+            readFileURL(this);
+            var fileValue = $(this).val();
+            var fileName = fileValue.toLowerCase();
+            var ext = fileName.substring(fileName.lastIndexOf('.') + 1);
+            var fileInpSize = $(this)[0].files[0].size;
+            var fileSize = 2;
+            var fileByteSize = 0;
+            if (fileSize > 0) {
+                fileByteSize = (fileSize * 1024) * 1024;
+            }
+            if (fileInpSize > fileByteSize) {
+                $("#BE_LOGO_URL_Error").css('display', 'block').text("Please choose a file less than or equal to 2MB");
+                $('#image-div').attr('src', '/Content/images/logo/NoImage.jpg');
+                $("#Item1_BE_LOGO_URL").val('');
+                $("#image-div").val('');
+                $("#file").val('');
+            }
+            else {
+                $("#BE_LOGO_URL_Error").text("");
+            }
+        });
+
+        $('#Item1_BE_EMAIL').on('blur', function () {
+            CheckEmailValidation();
+        });
+
+        function CheckEmailValidation() {
+            var email = $('#Item1_BE_EMAIL').val();
+            var emailTrim = email.trim();
+            var emailLength = email.length;
+            if (emailLength > 0 && emailTrim == "") {
+                $("#BE_EMAIL_Error").css('display', 'block').text('Email ID must be entered');
+                $("#Item1_BE_EMAIL").val(emailTrim);
+            }
+            else {
+                if (emailTrim != "") {
+                    var regex = /^\w+([-+.'][^\s]\w+)*@@\w+([-.]\w+)*\.\w+([-.]\w+)*$/
+                    if (regex.test(emailTrim)) {
+                        $("#BE_EMAIL_Error").css('display', 'none').text("");
+                        $('#Item1_BE_EMAIL').val(emailTrim);
+                    }
+                    else {
+                        $("#BE_EMAIL_Error").css('display', 'block').text("Please enter valid Email ID");
+                        $('#Item1_BE_EMAIL').val(emailTrim);
+                    }
+                }
+            }
+        };
+
+        $("#Item1_BE_CITY_ID").change(function () {
+            var inCityId = $("#Item1_BE_CITY_ID").val();
+            if (inCityId != "") {
+                $.ajax({
+                    url: '@Url.Action("GetStateCountry", "BusEntities")',
+                    type: 'GET',
+                    data: { inCityId: inCityId },
+                    success: function (data) {
+                        if (data != "") {
+                            $("#Item1_BE_STATE_CODE").val(data[0]).trigger("change");
+                            $("#Item1_BE_CNTRY_CODE").val(data[1]).trigger("change");
+                        }
+                    }
+                });
+            }
+            else {
+                $("#Item1_BE_STATE_CODE").val("").trigger("change");
+                $("#Item1_BE_CNTRY_CODE").val("").trigger("change");
+            }
+        });
+
+        $("#Item1_BE_ADDRESS").blur(function () {
+            CheckAddress();
+        });
+
+        function CheckAddress() {
+            var inAddress = $("#Item1_BE_ADDRESS").val();
+            var inAddressTrim = inAddress.trim();
+            var inAddressLength = inAddress.length;
+            if (inAddressLength > 0 && inAddressTrim == "") {
+                $("#BE_ADDRESS_Error").css('display', 'block').text('Address must be entered');
+                $("#Item1_BE_ADDRESS").val(inAddressTrim);
+            }
+            else {
+                if (inAddressTrim != "") {
+                    $("#BE_ADDRESS_Error").css('display', 'block').text('');
+                    $("#Item1_BE_ADDRESS").val(inAddressTrim);
+                }
+            }
+        }
+
+        $('#btnSave').on('click', function () {
+            $.ajaxSetup({
+                async: false
+            });
+
+            if ($("#frmBusEntities").valid()) {
+                CheckEntityNameExists();
+                var mobNo = $('#Item1_BE_MOB_NO').val();
+                CheckMobileNoValidation(mobNo, 'M');
+                CheckEmailValidation();
+                var error1 = $(".error").text();
+                if (error1 == "") {
+                    $("#Item1_BE_STATE_CODE").attr("disabled", false);
+                    $("#Item1_BE_CNTRY_CODE").attr("disabled", false);
+                    $("#frmBusEntities").submit();
+                }
+            }
+        });
+    });
+</script>

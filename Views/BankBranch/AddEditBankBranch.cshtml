@@ -1,0 +1,388 @@
+﻿@model HRMS.Models.BANK_BRANCHES
+@{
+    Layout = null;
+    string btnType = "";
+    if (Model.BB_CRE_BY == null)
+    {
+        ViewBag.Title = "Bank Branch - Add New";
+        btnType = "Save";
+    }
+    else
+    {
+        ViewBag.Title = "Bank Branch - Edit";
+        btnType = "Update";
+    }
+}
+
+<div class="modal-header" id="bankBranchModalLabel">
+    <h5 class="modal-title">@ViewBag.Title</h5>
+    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><i class="bi bi-x"></i></button>
+</div>
+<div class="modal-body">
+    @using (Html.BeginForm("SaveBankBranch", "BankBranch", FormMethod.Post, new { @id = "frmBankBranch" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(h => h.BB_ID)
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="form-group">
+                    <label class="form-control-label"><strong>Bank</strong><span class="mantSpan"> *</span></label>
+                    @Html.DropDownListFor(m => m.BB_BANK_CODE, new SelectList(HRMS.Models.DropDownList.GetBanks(), "id", "text"), new { @class = "form-control select2", @data_placeholder = "Select Bank", @style = "width:100%" })
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="form-group">
+                    <label class="form-control-label"><strong>Branch Name</strong><span class="mantSpan"> *</span></label>
+                    @Html.TextBoxFor(m => m.BB_NAME, new { @class = "form-control", @maxlength = "30", @placeholder = "Enter Branch Name", @autocomplete = "off", @onkeypress = "return /[A-Za-z ]/.test(event.key)", @readonly = "readonly" })
+                    <label id="BB_NAME_Error" class="error text-danger mt-2" for="BB_NAME" style="display:none"></label>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="form-group">
+                    <label class="form-control-label"><strong>IFSC Code</strong><span class="mantSpan"> *</span></label>
+                    @Html.TextBoxFor(m => m.BB_IFSC_CODE, new { @class = "form-control", @maxlength = "11", @placeholder = "Enter IFSC Code", @autocomplete = "off", @onkeypress = "return /[A-Za-z0-9]/.test(event.key)" })
+                    <label id="BB_IFSC_CODE_Error" class="error text-danger mt-2" for="BB_IFSC_CODE" style="display:none"></label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="form-group">
+                    <label class="form-control-label"><strong>Mobile No.</strong><span class="mantSpan"> *</span></label>
+                    @Html.TextBoxFor(m => m.BB_MOB_NO, new { @class = "form-control", @maxlength = "15", @placeholder = "Enter Mobile No.", @autocomplete = "off", @onkeypress = "return /[0-9+ ]/.test(event.key)" })
+                    <label id="BB_MOB_NO_Error" class="error text-danger mt-2" for="BB_MOB_NO" style="display:none"></label>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="form-group">
+                    <label class="form-control-label"><strong>Email ID</strong><span class="mantSpan"> *</span></label>
+                    @Html.TextBoxFor(m => m.BB_EMAIL, new { @class = "form-control", @maxlength = "50", @placeholder = "Enter Email ID", @autocomplete = "off" })
+                    <label id="BB_EMAIL_Error" class="error text-danger mt-2" for="BB_EMAIL" style="display:none"></label>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="form-group">
+                    <label class="form-control-label"><strong>Fax</strong></label>
+                    @Html.TextBoxFor(m => m.BB_FAX, new { @class = "form-control", @maxlength = "10", @placeholder = "Enter Fax", @autocomplete = "off", @onkeypress = "return /[A-Za-z0-9]/i.test(event.key)" })
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-8">
+                <div class="form-group">
+                    <label class="form-control-label"><strong>Address</strong> <span class="mantSpan"> *</span></label>
+                    @Html.TextAreaFor(m => m.BB_ADDRESS, new { @class = "form-control", @maxlength = "100", @placeholder = "Enter Address", @autocomplete = "off" })
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <label class="form-control-label"><strong>Post Box No.</strong> <span class="mantSpan"> *</span></label>
+                @Html.TextBoxFor(m => m.BB_POST_BOX_NO, new { @class = "form-control", @maxlength = "6", @placeholder = "Enter Post Box No.", @autocomplete = "off", @onkeypress = "return /[0-9]/i.test(event.key)" })
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="form-group">
+                    <label class="form-control-label"><strong>City</strong><span class="mantSpan"> *</span></label>
+                    @Html.DropDownListFor(m => m.BB_CITY_ID, new SelectList(HRMS.Models.DropDownList.GetCities(), "id", "text"), new { @class = "form-control select2", @data_placeholder = "Select City", @style = "width:100%" })
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="form-group">
+                    <label class="form-control-label"><strong>State</strong><span class="mantSpan"> *</span></label>
+                    @Html.DropDownListFor(m => m.BB_STATE_CODE, new SelectList(HRMS.Models.DropDownList.GetStates(), "id", "text"), new { @class = "form-control select2", @data_placeholder = "Select State", @style = "width:100%", @disabled = "disabled" })
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="form-group">
+                    <label class="form-control-label"><strong>Country</strong><span class="mantSpan"> *</span></label>
+                    @Html.DropDownListFor(m => m.BB_CNTRY_CODE, new SelectList(HRMS.Models.DropDownList.GetCountries(), "id", "text"), new { @class = "form-control select2", @data_placeholder = "Select Country", @style = "width:100%", @disabled = "disabled" })
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-primary btnSave">@btnType <i class="bi bi-check2-circle custom-icon"></i></button>
+    <button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">Close <i class="bi bi-arrow-right-circle custom-icon"></i></button>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $(".select2").select2({
+            allowClear: true,
+            dropdownParent: $('#bankBranchModalLabel')
+        });
+
+        if ('@Model.BB_ID' > 0) {
+            $("#BB_BANK_CODE").attr('disabled', true);
+        }
+
+        $('#BB_BANK_CODE').on('select2:open', function () {
+            $('input.select2-search__field').attr('placeholder', 'Search Bank');
+        });
+
+        $('#BB_CITY_ID').on('select2:open', function () {
+            $('input.select2-search__field').attr('placeholder', 'Search City');
+        });
+
+        $("#frmBankBranch").validate({
+            rules: {
+                'BB_BANK_CODE': {
+                    required: true
+                },
+                'BB_NAME': {
+                    required: {
+                        depends: function () {
+                            var isdepend = false;
+                            if ($("#BB_BANK_CODE").val() != "") {
+                                isdepend = true;
+                            }
+                            return isdepend;
+                        }
+                    },
+                    normalizer: function (value) {
+                        var trimmedValue = $.trim(value);
+                        if (trimmedValue == "") {
+                            $("#BB_NAME").val(trimmedValue);
+                        }
+                        return trimmedValue;
+                    }
+                },
+                'BB_IFSC_CODE': {
+                    required: true
+                },
+                'BB_MOB_NO': {
+                    required: true,
+                    normalizer: function (value) {
+                        var trimmedValue = $.trim(value);
+                        if (trimmedValue == "") {
+                            $("#BB_MOB_NO").val(trimmedValue);
+                        }
+                        return trimmedValue;
+                    }
+                },
+                'BB_EMAIL': {
+                    required: true,
+                    normalizer: function (value) {
+                        var trimmedValue = $.trim(value);
+                        if (trimmedValue == "") {
+                            $("#BB_EMAIL").val(trimmedValue);
+                        }
+                        return trimmedValue;
+                    }
+                },
+                'BB_ADDRESS': {
+                    required: true,
+                    normalizer: function (value) {
+                        var trimmedValue = $.trim(value);
+                        if (trimmedValue == "") {
+                            $("#BB_ADDRESS").val(trimmedValue);
+                        }
+                        return trimmedValue;
+                    }
+                },
+                'BB_POST_BOX_NO': {
+                    required: true
+                },
+                'BB_CITY_ID': {
+                    required: true
+                }
+            },
+            messages: {
+                'BB_BANK_CODE': {
+                    required: 'Bank must be selected'
+                },
+                'BB_NAME': {
+                    required: 'Branch Name must be entered'
+                },
+                'BB_IFSC_CODE': {
+                    required: 'IFSC Code must be entered'
+                },
+                'BB_MOB_NO': {
+                    required: 'Mobile No. must be entered'
+                },
+                'BB_EMAIL': {
+                    required: 'Email ID must be entered'
+                },
+                'BB_ADDRESS': {
+                    required: 'Address must be entered'
+                },
+                'BB_POST_BOX_NO': {
+                    required: 'Post Box No. must be entered'
+                },
+                'BB_CITY_ID': {
+                    required: 'City must be selected'
+                }
+            },
+            errorPlacement: function (label, element) {
+                label.addClass('mt-2 text-danger');
+                label.insertAfter(element);
+            },
+            highlight: function (element, errorClass) {
+                $(element).parent().addClass('has-danger')
+                $(element).addClass('form-control-danger')
+            }, errorPlacement: function (label, element) {
+                if (element.parent('.input-group').length) {
+                    label.insertAfter(element.parent());
+                    label.addClass('mt-2 text-danger');
+                    // radio/checkbox?
+                } else if (element.hasClass('select2')) {
+                    label.insertAfter(element.next('span'));
+                    label.addClass('mt-2 text-danger');
+                    // select2
+                } else {
+                    label.insertAfter(element);
+                    label.addClass('mt-2 text-danger');
+                    // default
+                }
+            }
+        });
+
+        $("#BB_BANK_CODE").change(function () {
+            var bank = $("#BB_BANK_CODE").val();
+            if (bank != "") {
+                CheckBankBranchNameExists();
+                $("#BB_NAME").prop('readonly', false);
+            }
+            else {
+                $("#BB_NAME").prop('readonly', true);
+            }
+        });
+
+        $("#BB_NAME").blur(function () {
+            CheckBankBranchNameExists();
+        });
+
+        function CheckBankBranchNameExists() {
+            var bankCode = $("#BB_BANK_CODE").val();
+            var bankBranchName = $("#BB_NAME").val();
+            var bankBranchNameTrim = bankBranchName.trim();
+            if (bankBranchNameTrim != "") {
+
+                var bankBranchID = '@Model.BB_ID';
+                var creBy = '@Model.BB_CRE_BY';
+                var parm = { "bankCode": bankCode, "bankBranchName": bankBranchNameTrim, "bankBranchID": bankBranchID, "creBy": creBy };
+                $.getJSON("/BankBranch/CheckBankBranchNameExists", parm,
+                    function (data) {
+                        if (data == true) {
+                            $("#BB_NAME_Error").css('display', 'inline-block').text('Branch Name Already Exists');
+                            $("#BB_NAME").val(bankBranchNameTrim);
+                        }
+                        else {
+                            $("#BB_NAME_Error").css('display', 'none');
+                        }
+                    });
+            }
+        }
+
+        $("#BB_IFSC_CODE").blur(function () {
+            CheckIFSCCodeExists();
+        });
+
+        function CheckIFSCCodeExists() {
+            var IFSCCode = $("#BB_IFSC_CODE").val();
+            if (IFSCCode != "") {
+                var bankBranchID = '@Model.BB_ID';
+                var creBy = '@Model.BB_CRE_BY';
+                var parm = { "IFSCCode": IFSCCode, "bankBranchID": bankBranchID, "creBy": creBy };
+                $.getJSON("/BankBranch/CheckIFSCCodeExists", parm,
+                    function (data) {
+                        if (data == true) {
+                            $("#BB_IFSC_CODE_Error").css('display', 'inline-block').text('IFSC Code Already Exists');
+                            $("#BB_IFSC_CODE").val(IFSCCode);
+                        }
+                        else {
+                            $("#BB_IFSC_CODE_Error").css('display', 'none');
+                        }
+                    });
+            }
+        }
+
+        $("#BB_CITY_ID").change(function () {
+            var cityId = $("#BB_CITY_ID").val();
+            if (cityId != "") {
+                var parm = { "cityId": cityId };
+                $.getJSON("/BankBranch/GetStateCountry", parm,
+                function (data) {
+                    if (data.redirectUrl) {
+                        window.location = data.redirectUrl;
+                    }
+                    else if (data != "") {
+                        $("#BB_STATE_CODE").val(data[0]).trigger("change");
+                        $("#BB_CNTRY_CODE").val(data[1]).trigger("change");
+                    }
+                });
+            }
+            else {
+                $("#BB_STATE_CODE").val("").trigger("change");
+                $("#BB_CNTRY_CODE").val("").trigger("change");
+            }
+        });
+
+        $('#BB_EMAIL').on('blur', function () {
+            CheckEmailValidation();
+        });
+
+        function CheckEmailValidation() {
+            var email = $('#BB_EMAIL').val();
+            var emailTrim = email.trim();
+            if (emailTrim != "") {
+                var regex = /^\w+([-+.'][^\s]\w+)*@@\w+([-.]\w+)*\.\w+([-.]\w+)*$/
+                if (regex.test(emailTrim)) {
+                    $("#BB_EMAIL_Error").css('display', 'none');
+                    $('#BB_EMAIL').val(emailTrim);
+                    return true;
+                }
+                else {
+                    $("#BB_EMAIL_Error").css('display', 'inline-block').text("Please enter valid Email ID");
+                    $('#BB_EMAIL').val(emailTrim);
+                }
+            }
+        }
+
+        $('#BB_MOB_NO').blur(function () {
+            CheckMobileNoValidation();
+        });
+
+        function CheckMobileNoValidation() {
+            var mobileNo = $('#BB_MOB_NO').val();
+            var mobileNoTrim = mobileNo.trim();
+            if (mobileNoTrim != "") {
+                var regex = /^(\+91[-\s]?([-][\s]?)?|0091[-\s]?([-][\s]?)?|091[-\s]?([-][\s]?)?|91[-\s]?([-][\s]?)?|0)?[6-9]\d{4}[-\s]?\d{5}$/;
+                if (regex.test(mobileNoTrim)) {
+                    $('#BB_MOB_NO_Error').css('display', 'none');
+                    $("#BB_MOB_NO").val(mobileNoTrim);
+                }
+                else {
+                    $('#BB_MOB_NO_Error').css('display', 'inline-block').text("Please enter valid Mobile No.");
+                    $("#BB_MOB_NO").val(mobileNoTrim);
+                }
+            }
+        }
+
+        $('.btnSave').on('click', function () {
+            $.ajaxSetup({
+                async: false
+            });
+
+            if ($("#frmBankBranch").valid()) {
+                CheckBankBranchNameExists();
+                CheckIFSCCodeExists();
+                CheckEmailValidation();
+                CheckMobileNoValidation();
+                var error = $('.error').text();
+                if (error == "") {
+                    $("#BB_STATE_CODE").attr("disabled", false);
+                    $("#BB_CNTRY_CODE").attr("disabled", false);
+                    $("#frmBankBranch").submit();
+                }
+            }
+            else {
+                CheckBankBranchNameExists();
+                CheckIFSCCodeExists();
+                CheckEmailValidation();
+                CheckMobileNoValidation();
+            }
+        });
+    });
+</script>
